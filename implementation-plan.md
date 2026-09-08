@@ -54,6 +54,9 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [x] Click a card → `ipcRenderer.send('note:open', id)`
 - [x] Delete button on card (moves to trash)
 
+#### Cleanup
+- [ ] Remove "Sign out" button from `NoteWindow` toolbar — keep it only in the `Dashboard` header
+
 ---
 
 ## Phase 2 — Rich Editor
@@ -117,10 +120,15 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [ ] Tailwind `dark:` classes throughout
 
 #### Window behavior
+- [ ] Remove native window frame and menu bar: set `frame: false` on all BrowserWindows in `electron/windowManager.ts`; call `Menu.setApplicationMenu(null)` in `electron/main.ts`
+- [ ] Custom title bar on all windows: drag region (`-webkit-app-region: drag`) + custom close button that sends IPC channel `window:close` → `win.close()`; note windows also get a minimize button
 - [ ] Always-on-top toggle per note window (`win.setAlwaysOnTop(bool)` via IPC)
 - [ ] System tray icon: left-click opens dashboard, right-click menu has "New Note" and "Quit"
 - [ ] Global hotkey (`Ctrl+Alt+N` default, configurable in settings) calls `createNote()`
 - [ ] Window position + size saved to `electron-store` keyed by `noteId`; restored on next open
+
+#### Dashboard extras
+- [ ] "Keyboard Shortcuts" button in dashboard header opens a `ShortcutsWindow` (`?view=shortcuts`) listing all Edit, View, and Window shortcuts for the editor and app
 
 ---
 
