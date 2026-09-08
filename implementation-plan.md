@@ -13,15 +13,15 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 
 ### Tasks
 
-- [ ] **Scaffold**: init project with `electron-vite` (Vite + Electron + TypeScript template)
-- [ ] **Dependencies**: install `firebase`, `react`, `react-dom`, `electron-store`
-- [ ] **Firebase init**: create `src/lib/firebase.ts` — initialize app, set `browserLocalPersistence`
-- [ ] **Auth**: `onAuthStateChanged` listener; if no user → render `<LoginScreen>` with "Sign in with Google" button using `signInWithPopup(GoogleAuthProvider)`
+- [x] **Scaffold**: init project with `electron-vite` (Vite + Electron + TypeScript template)
+- [x] **Dependencies**: install `firebase`, `react`, `react-dom`, `electron-store`
+- [x] **Firebase init**: create `src/lib/firebase.ts` — initialize app, set `browserLocalPersistence`
+- [x] **Auth**: `onAuthStateChanged` listener; if no user → render `<LoginScreen>` with "Sign in with Google" button using `signInWithPopup(GoogleAuthProvider)`
 - [ ] **Persistent session**: confirm that closing and reopening the app skips the login screen
-- [ ] **Single note**: after login, render a plain `<textarea>` bound to a `noteContent` state
-- [ ] **Auto-save**: debounce (500 ms) writes `noteContent` to `users/{uid}/notes/default` in Firestore
-- [ ] **Load on start**: on auth, read `users/{uid}/notes/default` from Firestore and populate the textarea
-- [ ] **Sign out**: add a "Sign out" button that calls `signOut()` and clears the view
+- [x] **Single note**: after login, render a plain `<textarea>` bound to a `noteContent` state
+- [x] **Auto-save**: debounce (500 ms) writes `noteContent` to `users/{uid}/notes/default` in Firestore
+- [x] **Load on start**: on auth, read `users/{uid}/notes/default` from Firestore and populate the textarea
+- [x] **Sign out**: add a "Sign out" button that calls `signOut()` and clears the view
 
 ---
 
@@ -32,27 +32,27 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 ### Tasks
 
 #### Electron multi-window
-- [ ] `electron/windowManager.ts`: map of `noteId → BrowserWindow`; functions `openNote(id)`, `closeNote(id)`, `openDashboard()`
-- [ ] Each window loads the same renderer bundle; URL query param `?view=note&id=X` or `?view=dashboard` determines which React page renders
-- [ ] `App.tsx` reads `window.location.search` and renders `<NoteWindow>` or `<Dashboard>`
-- [ ] IPC channel `note:open` — renderer sends noteId, main process calls `windowManager.openNote(id)`
-- [ ] IPC channel `note:close` — renderer notifies main; main removes from map
-- [ ] On app start: reopen all notes that were open when the app last closed (persisted in `electron-store`)
+- [x] `electron/windowManager.ts`: map of `noteId → BrowserWindow`; functions `openNote(id)`, `closeNote(id)`, `openDashboard()`
+- [x] Each window loads the same renderer bundle; URL query param `?view=note&id=X` or `?view=dashboard` determines which React page renders
+- [x] `App.tsx` reads `window.location.search` and renders `<NoteWindow>` or `<Dashboard>`
+- [x] IPC channel `note:open` — renderer sends noteId, main process calls `windowManager.openNote(id)`
+- [x] IPC channel `note:close` — renderer notifies main; main removes from map
+- [x] On app start: reopen all notes that were open when the app last closed (persisted in `electron-store`)
 
 #### Firestore CRUD
-- [ ] `src/lib/firestore.ts`: `createNote()`, `updateNote()`, `deleteNote()`, `getNotes()`, `subscribeToNotes(callback)`
-- [ ] `createNote()` generates a Firestore doc ID and opens a new window for it
-- [ ] `subscribeToNotes` uses `onSnapshot` — dashboard reacts to changes in real time
+- [x] `src/lib/firestore.ts`: `createNote()`, `updateNote()`, `deleteNote()`, `getNotes()`, `subscribeToNotes(callback)`
+- [x] `createNote()` generates a Firestore doc ID and opens a new window for it
+- [x] `subscribeToNotes` uses `onSnapshot` — dashboard reacts to changes in real time
 
 #### State
-- [ ] `authStore` (Zustand): `user`, `loading`
-- [ ] `notesStore` (Zustand): `notes[]`, `openNoteIds[]`
+- [x] `authStore` (Zustand): `user`, `loading`
+- [x] `notesStore` (Zustand): `notes[]`, `openNoteIds[]`
 
 #### Dashboard page
-- [ ] Grid of note cards (title + color preview + last updated)
-- [ ] "New Note" button → `createNote()` → opens new window
-- [ ] Click a card → `ipcRenderer.send('note:open', id)`
-- [ ] Delete button on card (moves to trash)
+- [x] Grid of note cards (title + color preview + last updated)
+- [x] "New Note" button → `createNote()` → opens new window
+- [x] Click a card → `ipcRenderer.send('note:open', id)`
+- [x] Delete button on card (moves to trash)
 
 ---
 
