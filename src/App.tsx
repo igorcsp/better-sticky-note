@@ -4,6 +4,7 @@ import { getDoc, doc } from 'firebase/firestore'
 import { auth, db } from './lib/firebase'
 import { createNote } from './lib/firestore'
 import { useAuthStore } from './store/authStore'
+import { useNotesStore } from './store/notesStore'
 import { usePrefsStore } from './store/prefsStore'
 import LoginScreen from './components/LoginScreen'
 import AccessDenied from './components/AccessDenied'
@@ -47,6 +48,7 @@ export default function App() {
         setAllowed(snap.exists())
       } else {
         setAllowed(null)
+        useNotesStore.getState().reset()
       }
       setLoading(false)
     })

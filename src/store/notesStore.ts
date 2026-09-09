@@ -7,6 +7,7 @@ type NotesState = {
   setNotes: (notes: Note[]) => void
   addOpenNote: (id: string) => void
   removeOpenNote: (id: string) => void
+  reset: () => void
 }
 
 export const useNotesStore = create<NotesState>()((set) => ({
@@ -23,4 +24,5 @@ export const useNotesStore = create<NotesState>()((set) => ({
     set((state) => ({
       openNoteIds: state.openNoteIds.filter((noteId) => noteId !== id),
     })),
+  reset: () => set({ notes: [] }),
 }))

@@ -12,6 +12,7 @@ export interface IElectronAPI {
   toggleAlwaysOnTop: () => Promise<boolean>
   // Registers a tray/hotkey new-note listener; returns an unsubscribe function.
   onNewNote: (cb: () => void) => () => void
+  clearGoogleSession: () => Promise<void>
 }
 
 declare global {

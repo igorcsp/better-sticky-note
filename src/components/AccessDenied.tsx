@@ -1,6 +1,5 @@
-import { signOut } from 'firebase/auth'
 import type { User } from 'firebase/auth'
-import { auth } from '../lib/firebase'
+import { signOutAndClearSession } from '../lib/auth'
 
 export default function AccessDenied({ user }: { user: User }) {
   return (
@@ -13,7 +12,7 @@ export default function AccessDenied({ user }: { user: User }) {
           Contact the owner to request access.
         </p>
         <button
-          onClick={() => signOut(auth)}
+          onClick={() => signOutAndClearSession()}
           className="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
         >
           Sign out

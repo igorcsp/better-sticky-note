@@ -21,4 +21,5 @@ contextBridge.exposeInMainWorld('electron', {
     ipcRenderer.on('new-note', listener)
     return () => ipcRenderer.removeListener('new-note', listener)
   },
+  clearGoogleSession: (): Promise<void> => ipcRenderer.invoke('auth:clear-google-session'),
 })

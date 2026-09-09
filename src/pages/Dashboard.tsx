@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { signOut } from 'firebase/auth'
 import { GripHorizontal, LogOut } from 'lucide-react'
-import { auth } from '../lib/firebase'
+import { signOutAndClearSession } from '../lib/auth'
 import {
   createNote,
   deleteNote,
@@ -162,7 +161,7 @@ export default function Dashboard({ uid }: Props) {
                 + New Note
               </button>
               <button
-                onClick={() => signOut(auth)}
+                onClick={() => signOutAndClearSession()}
                 title="Sign out"
                 className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >

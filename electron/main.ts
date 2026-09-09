@@ -3,6 +3,7 @@ import { autoUpdater } from 'electron-updater'
 import * as windowManager from './windowManager'
 import { store, type Theme } from './store'
 import { TRAY_ICON_DATA_URL } from './trayIcon'
+import { clearGoogleAuthCookies } from './authSession'
 
 // Kept alive for the app's lifetime; a dropped reference lets the OS reclaim the
 // tray icon.
@@ -115,6 +116,13 @@ app.whenReady().then(async () => {
 
   ipcMain.on('prefs:set-theme', (_event, theme: Theme) => {
     store.set('theme', theme)
+  })
+
+  // Google's SSO cookie survives Firebase signOut() since all windows share
+  // the default session — clear it so the next sign-in prompts for an
+  // account instead of silently reusing the previous one.
+  ipcMain.handle('auth:clear-google-session', async () => {
+    await clearGoogleAuthCookies()
   })
 
   setupTray()
