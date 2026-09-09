@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { signOut } from 'firebase/auth'
+import { GripHorizontal } from 'lucide-react'
 import { auth } from '../lib/firebase'
 import {
   createNote,
@@ -117,51 +118,57 @@ export default function Dashboard({ uid }: Props) {
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar view={view} counts={counts} onSelect={setView} />
       <div className="flex flex-1 flex-col">
-        <header
-          className="flex items-center justify-between gap-4 border-b bg-white py-4 pl-6 shadow-sm dark:border-gray-800 dark:bg-gray-800"
-          style={DRAG}
-        >
-          <div className="flex flex-1 items-center gap-3" style={NO_DRAG}>
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search notes…"
-              className="w-full max-w-xs rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-            />
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortKey)}
-              className="rounded-lg border border-gray-200 px-2 py-2 text-sm text-gray-600 focus:border-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-            >
-              <option value="modified">Last modified</option>
-              <option value="created">Created</option>
-              <option value="title">Title A–Z</option>
-            </select>
+        <header className="border-b bg-white shadow-sm dark:border-gray-800 dark:bg-gray-800">
+          {/* Dedicated drag strip — larger target, visually signals draggability */}
+          <div
+            className="flex h-7 cursor-grab items-center justify-center select-none active:cursor-grabbing bg-gray-50 dark:bg-gray-900/60"
+            style={DRAG}
+          >
+            <GripHorizontal size={16} className="pointer-events-none text-gray-300 dark:text-gray-600" />
           </div>
-          <div className="flex items-center gap-4" style={NO_DRAG}>
-            <ThemeToggle />
-            <button
-              onClick={() => window.electron.openShortcuts()}
-              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              title="Keyboard shortcuts"
-            >
-              Shortcuts
-            </button>
-            <button
-              onClick={handleNewNote}
-              className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600"
-            >
-              + New Note
-            </button>
-            <button
-              onClick={() => signOut(auth)}
-              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              Sign out
-            </button>
+          <div className="flex items-center justify-between gap-4 py-3 pl-6">
+            <div className="flex flex-1 items-center gap-3" style={NO_DRAG}>
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search notes…"
+                className="w-full max-w-xs rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              />
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+                className="rounded-lg border border-gray-200 px-2 py-2 text-sm text-gray-600 focus:border-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+              >
+                <option value="modified">Last modified</option>
+                <option value="created">Created</option>
+                <option value="title">Title A–Z</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-4" style={NO_DRAG}>
+              <ThemeToggle />
+              <button
+                onClick={() => window.electron.openShortcuts()}
+                className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                title="Keyboard shortcuts"
+              >
+                Shortcuts
+              </button>
+              <button
+                onClick={handleNewNote}
+                className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600"
+              >
+                + New Note
+              </button>
+              <button
+                onClick={() => signOut(auth)}
+                className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                Sign out
+              </button>
+            </div>
+            <WindowControls />
           </div>
-          <WindowControls />
         </header>
         <main className="flex-1 overflow-y-auto p-6">
           {visibleNotes.length === 0 ? (
