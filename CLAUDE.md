@@ -8,7 +8,7 @@
 ## Stack (quick reference)
 - **Desktop**: Electron 32 + electron-vite
 - **UI**: React 18 + TypeScript + Vite
-- **Editor**: TipTap (rich text) + CodeMirror 6 (multi-cursor, find/replace)
+- **Editor**: CodeMirror 6 — whole note is a Markdown surface with VSCode keybindings
 - **Auth**: Firebase Auth — Google OAuth, `browserLocalPersistence` (login once, never again unless logout)
 - **DB**: Firestore (real-time sync, offline persistence)
 - **State**: Zustand
@@ -30,7 +30,6 @@
 Before writing or editing code that involves a library, fetch its current docs via context7. Never rely on training-data knowledge for APIs — these libraries update frequently.
 
 Libraries that require context7 lookup before use:
-- `@tiptap/*` — extension APIs change between minor versions
 - `@codemirror/*` — modular API, easy to import wrong package
 - `firebase/*` — modular SDK v10+ syntax differs from v8
 - `electron` — IPC and security APIs evolve each major version
@@ -40,8 +39,8 @@ Libraries that require context7 lookup before use:
 - `electron-builder` — config schema and target options
 
 ```
-// Example: before writing any TipTap code
-mcp__context7__resolve-library-id("tiptap") → then mcp__context7__query-docs(...)
+// Example: before writing any CodeMirror code
+mcp__context7__resolve-library-id("CodeMirror 6") → then mcp__context7__query-docs(...)
 ```
 
 ### filesystem — use for all file operations in this project

@@ -25,19 +25,25 @@ All tools and services are **free** or have a free tier generous enough for pers
 
 ---
 
-## Text Editor — TipTap + CodeMirror 6
+## Text Editor — CodeMirror 6
 
-### TipTap (rich text layer)
-- **Why**: ProseMirror-based, excellent TypeScript support, extensible node/mark system
-- **Cost**: Free open-source core. Pro extensions (e.g., AI, collaboration) are paid — we use only free extensions.
-- **Used for**: Bold, italic, underline, strikethrough, headings, lists, blockquotes, inline code, code blocks
-- **Key packages**: `@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-*`
+The **entire note** is a CodeMirror 6 editor over raw Markdown. TipTap was evaluated and dropped:
+scoping CodeMirror to code blocks only would have confined multi-cursor and find & replace to
+fenced blocks, which is the opposite of the goal.
 
-### CodeMirror 6 (VSCode-like editing layer)
-- **Why**: Powers the editing engine behind many code editors; has native multi-cursor, find/replace, and keymap support
+- **Why**: powers the editing engine behind many code editors; native multi-cursor, find/replace,
+  rectangular selection and keymap support — everything Phase 2 needs, without a second editor layer
 - **Cost**: Free (MIT)
-- **Used for**: Multi-cursor (`Ctrl+D`), find & replace (`Ctrl+H`), column selection, move line (`Alt+↑/↓`), duplicate line
-- **Integration**: Embedded inside TipTap as a code-block extension, or used as the primary editor surface with TipTap marks applied via decorations
+- **Used for**: multi-cursor (`Ctrl+D`, `Ctrl+Alt+↑/↓`), find & replace with regex (`Ctrl+H`),
+  column selection (`Alt+drag`), move line (`Alt+↑/↓`), duplicate line (`Shift+Alt+↑/↓`)
+- **Key packages**: `@codemirror/state`, `@codemirror/view`, `@codemirror/commands`,
+  `@codemirror/search`, `@codemirror/language`, `@codemirror/lang-markdown`,
+  `@codemirror/language-data`, `@lezer/highlight`
+- **Rendering model**: *styled source*, not WYSIWYG. A custom `HighlightStyle` makes headings render
+  larger and bold, `**bold**` render bold, and code render monospace, while the Markdown markers stay
+  visible but muted — the Obsidian source-mode approach.
+- **Storage**: notes are stored as a Markdown `string`, so search, previews, and export stay trivial
+  and no content migration is ever needed.
 
 ---
 
@@ -122,8 +128,7 @@ All tools and services are **free** or have a free tier generous enough for pers
 |---|---|---|
 | Desktop | Electron 32 | MIT / Free |
 | UI | React 18 + TypeScript + Vite | MIT / Free |
-| Rich text editor | TipTap (open-source extensions only) | MIT / Free |
-| Code-editor features | CodeMirror 6 | MIT / Free |
+| Editor | CodeMirror 6 (Markdown surface, VSCode keybindings) | MIT / Free |
 | Auth | Firebase Auth (Google OAuth) | Free tier (Spark) |
 | Database | Cloud Firestore | Free tier (Spark) |
 | State | Zustand | MIT / Free |

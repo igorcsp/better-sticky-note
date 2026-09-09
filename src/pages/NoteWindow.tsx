@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
-import { signOut } from 'firebase/auth'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { doc, getDoc } from 'firebase/firestore'
-import { auth, db } from '../lib/firebase'
+import { db } from '../lib/firebase'
 import { updateNote } from '../lib/firestore'
+import { deriveTitle } from '../lib/noteTitle'
+import NoteEditor from '../components/editor/NoteEditor'
 
 interface Props {
   id: string
@@ -12,32 +13,67 @@ interface Props {
 const DEBOUNCE_MS = 500
 
 export default function NoteWindow({ id, uid }: Props) {
-  const [content, setContent] = useState('')
+  // null = still loading. The editor is not mounted until the note has loaded,
+  // so the loaded text becomes CodeMirror's *initial* document and can never
+  // be mistaken for a user edit. That is what keeps saving purely
+  // event-driven, with no "have we loaded yet" guard flag.
+  const [initialDoc, setInitialDoc] = useState<string | null>(null)
+
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingRef = useRef<string | null>(null)
 
   useEffect(() => {
+    let cancelled = false
     const ref = doc(db, 'users', uid, 'notes', id)
     getDoc(ref).then((snap) => {
-      if (snap.exists()) {
-        setContent((snap.data().content as string) ?? '')
-      }
+      // Guard against a slow read resolving after the user has started typing
+      // (or after the window has been closed).
+      if (cancelled) return
+      setInitialDoc(snap.exists() ? ((snap.data().content as string) ?? '') : '')
     })
+    return () => {
+      cancelled = true
+    }
   }, [id, uid])
 
-  function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    const value = e.target.value
-    setContent(value)
+  const flush = useCallback(() => {
+    const text = pendingRef.current
+    if (text === null) return
+    pendingRef.current = null
+    updateNote(uid, id, { content: text, title: deriveTitle(text) })
+  }, [uid, id])
 
+  const handleChange = useCallback(
+    (text: string) => {
+      pendingRef.current = text
+      if (timerRef.current) clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(flush, DEBOUNCE_MS)
+    },
+    [flush]
+  )
+
+  // Write any pending edit when the editor loses focus — clicking the window's
+  // close button blurs it first, so this catches the common case of closing a
+  // note within the debounce window.
+  const handleBlur = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(() => {
-      const title = value.split('\n')[0].trim().slice(0, 80) || 'New Note'
-      updateNote(uid, id, { content: value, title })
-    }, DEBOUNCE_MS)
-  }
+    flush()
+  }, [flush])
+
+  const flushRef = useRef(flush)
+  flushRef.current = flush
 
   useEffect(() => {
+    // Closing the OS window tears down the renderer without unmounting React,
+    // so the cleanup below is not enough on its own.
+    const onUnload = () => flushRef.current()
+    window.addEventListener('beforeunload', onUnload)
     return () => {
+      window.removeEventListener('beforeunload', onUnload)
       if (timerRef.current) clearTimeout(timerRef.current)
+      // Flush rather than discard: previously a keystroke made within 500 ms
+      // of closing a note window was silently lost.
+      flushRef.current()
     }
   }, [])
 
@@ -50,19 +86,14 @@ export default function NoteWindow({ id, uid }: Props) {
         >
           All Notes
         </button>
-        <button
-          onClick={() => signOut(auth)}
-          className="text-xs text-yellow-800 hover:underline"
-        >
-          Sign out
-        </button>
       </div>
-      <textarea
-        className="flex-1 resize-none bg-transparent p-4 text-sm text-gray-800 outline-none placeholder-yellow-500"
-        placeholder="Start typing…"
-        value={content}
-        onChange={handleChange}
-      />
+      {initialDoc === null ? (
+        <div className="flex flex-1 items-center justify-center">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-yellow-400 border-t-transparent" />
+        </div>
+      ) : (
+        <NoteEditor initialDoc={initialDoc} onChange={handleChange} onBlur={handleBlur} />
+      )}
     </div>
   )
 }

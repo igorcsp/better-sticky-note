@@ -14,7 +14,7 @@ Development phases and task breakdown are in [implementation-plan.md](./implemen
 | Decision | Choice | Rationale |
 |---|---|---|
 | Window model | One `BrowserWindow` per note + separate All Notes window | More authentic sticky-note feel; allows future categories/folders in the dashboard |
-| Editor | TipTap + CodeMirror 6 integrated from the start | Both from the start avoids a painful migration mid-project |
+| Editor | CodeMirror 6 over raw Markdown (whole note) | VSCode-style multi-cursor and find/replace work everywhere in a note, not only inside code blocks. Trade-off: styled source, not WYSIWYG |
 
 ---
 
@@ -28,15 +28,17 @@ Development phases and task breakdown are in [implementation-plan.md](./implemen
 - [ ] Offline support — notes work without internet, sync on reconnect
 
 ### Editor
-- [ ] Rich text: bold, italic, underline, strikethrough, inline code
-- [ ] Headings (H1–H3), bullet lists, numbered lists, blockquotes
-- [ ] Code blocks with syntax highlighting
-- [ ] Multi-cursor editing (`Ctrl+D` select next occurrence, `Ctrl+Alt+↓` add cursor below)
-- [ ] Find & Replace (`Ctrl+H`) with regex support
-- [ ] Column selection (`Alt+drag` or `Alt+Shift+↓`)
-- [ ] Undo/Redo (`Ctrl+Z` / `Ctrl+Shift+Z`)
-- [ ] Select all (`Ctrl+A`), duplicate line (`Ctrl+Shift+D`)
-- [ ] Move line up/down (`Alt+↑/↓`)
+Notes are raw Markdown rendered as *styled source* — markers stay visible but muted.
+
+- [x] Markdown formatting: bold, italic, strikethrough, inline code — rendered with real weight/style
+- [x] Headings (H1–H6 styled), bullet lists, numbered lists, blockquotes
+- [x] Fenced code blocks with per-language syntax highlighting
+- [x] Multi-cursor editing (`Ctrl+D` select next occurrence, `Ctrl+Alt+↑/↓` add cursor)
+- [x] Find & Replace (`Ctrl+H`) with regex support
+- [x] Column selection (`Alt+drag`, or `Ctrl+Shift+Alt+↑/↓`)
+- [x] Undo/Redo (`Ctrl+Z` / `Ctrl+Shift+Z`)
+- [x] Select all (`Ctrl+A`), duplicate line (`Shift+Alt+↑/↓`)
+- [x] Move line up/down (`Alt+↑/↓`)
 
 ### Notes Management
 - [ ] Each note opens in its own Electron window (independent, resizable, movable)
@@ -89,7 +91,7 @@ users/{userId}
 
 users/{userId}/notes/{noteId}
   title: string           // derived from first line, editable
-  content: string         // TipTap JSON
+  content: string         // Markdown source
   color: string           // hex color e.g. "#FFF176"
   fontSize: number        // default 14
   pinned: boolean
@@ -122,7 +124,7 @@ better-sticky-notes/
 │   │   ├── NoteWindow.tsx    # Single note editor view (one per window)
 │   │   └── Dashboard.tsx     # All Notes listing view
 │   ├── components/
-│   │   ├── editor/           # TipTap + CodeMirror wrappers
+│   │   ├── editor/           # CodeMirror theme, highlight, keymap, extensions, hook
 │   │   ├── notes/            # NoteCard (dashboard), NoteToolbar
 │   │   └── ui/               # shadcn base components
 │   ├── hooks/                # useNotes, useAuth, useSync
@@ -166,8 +168,8 @@ See [implementation-plan.md](./implementation-plan.md) for detailed task breakdo
 - Full Firestore CRUD
 
 ### Phase 2 — Rich Editor
-- TipTap + CodeMirror 6 integrated together
-- Bold, italic, lists, headings, code blocks, multi-cursor, find & replace
+- CodeMirror 6 Markdown editor with styled source rendering
+- Multi-cursor, find & replace, move/duplicate line, column selection
 
 ### Phase 3 — Notes Management
 - All Notes dashboard with search and filters

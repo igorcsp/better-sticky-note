@@ -17,7 +17,7 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [x] **Dependencies**: install `firebase`, `react`, `react-dom`, `electron-store`
 - [x] **Firebase init**: create `src/lib/firebase.ts` — initialize app, set `browserLocalPersistence`
 - [x] **Auth**: `onAuthStateChanged` listener; if no user → render `<LoginScreen>` with "Sign in with Google" button using `signInWithPopup(GoogleAuthProvider)`
-- [ ] **Persistent session**: confirm that closing and reopening the app skips the login screen
+- [x] **Persistent session**: confirm that closing and reopening the app skips the login screen
 - [x] **Single note**: after login, render a plain `<textarea>` bound to a `noteContent` state
 - [x] **Auto-save**: debounce (500 ms) writes `noteContent` to `users/{uid}/notes/default` in Firestore
 - [x] **Load on start**: on auth, read `users/{uid}/notes/default` from Firestore and populate the textarea
@@ -54,32 +54,49 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [x] Click a card → `ipcRenderer.send('note:open', id)`
 - [x] Delete button on card (moves to trash)
 
-#### Cleanup
-- [ ] Remove "Sign out" button from `NoteWindow` toolbar — keep it only in the `Dashboard` header
-
 ---
 
 ## Phase 2 — Rich Editor
 
-**Goal**: Replace the plain textarea with a full TipTap + CodeMirror 6 editor.
+**Goal**: Replace the plain textarea with a CodeMirror 6 Markdown editor with VSCode-style editing.
+
+> **Architecture change**: originally planned as TipTap (rich text) + CodeMirror (code blocks only).
+> Changed to **the whole note being a CodeMirror surface editing raw Markdown**, so the VSCode
+> shortcuts work everywhere in a note rather than only inside a fenced block. TipTap is not used.
+> Notes are *styled source* (a `#` heading renders large and bold, the `#` stays visible), not WYSIWYG.
+> `content` therefore stays a Markdown `string` — no format migration, existing notes load as-is.
 
 ### Tasks
 
-#### TipTap (rich text marks)
-- [ ] Install `@tiptap/react`, `@tiptap/starter-kit` and needed extensions
-- [ ] `src/components/editor/RichEditor.tsx` — TipTap editor component
-- [ ] Extensions to enable: Bold, Italic, Underline, Strike, Code, Heading (H1–H3), BulletList, OrderedList, Blockquote, CodeBlock, History
-- [ ] Toolbar component with buttons + keyboard shortcut labels
-- [ ] Store note content as TipTap JSON in Firestore (`content` field)
+#### CodeMirror 6 editor surface
+- [x] Install `@codemirror/{state,view,commands,search,language,lang-markdown,language-data}` + `@lezer/highlight`
+- [x] `src/components/editor/theme.ts` — sticky-note theme (transparent bg, proportional font, amber selection/panel)
+- [x] `src/components/editor/highlight.ts` — `HighlightStyle` so Markdown looks styled; syntax markers muted
+- [x] `src/components/editor/extensions.ts` — extension composition (hand-composed, not `basicSetup`)
+- [x] `src/components/editor/useCodeMirror.ts` — StrictMode-safe view lifecycle with `view.destroy()` cleanup
+- [x] `src/components/editor/NoteEditor.tsx` — React wrapper
+- [x] `src/components/editor/codeLanguages.ts` — curated static language list for fenced code blocks (js/ts, python, json, html, css, sql, yaml, rust, java, go, xml, shell)
+- [x] `src/components/editor/fencedCode.ts` — `ViewPlugin` marking fence lines so they stay monospace once a language parser takes over
 
-#### CodeMirror 6 (code blocks + VSCode keybindings)
-- [ ] Install `@codemirror/view`, `@codemirror/state`, `@codemirror/commands`, `@codemirror/search`, `@codemirror/language`
-- [ ] Replace TipTap's default `CodeBlock` with a custom node that renders a `CodeMirror` view
-- [ ] Wire up `defaultKeymap`, `searchKeymap` (activates `Ctrl+H` find & replace panel)
-- [ ] Multi-cursor: `Ctrl+D` selects next occurrence, `Ctrl+Alt+↓` adds cursor below
-- [ ] Move line: `Alt+↑` / `Alt+↓`
-- [ ] Duplicate line: `Ctrl+Shift+D`
-- [ ] Column selection: `Alt+Shift+↓` or `Alt+drag`
+#### VSCode keybindings (real VSCode bindings, not the earlier draft)
+- [x] `Ctrl+D` select next occurrence — free in `searchKeymap`
+- [x] `Ctrl+F` find / `Ctrl+H` find & replace with regex — panel opens focused on the replace field
+- [x] `Ctrl+Alt+↑/↓` add cursor above/below — free in `defaultKeymap`
+- [x] `Alt+↑/↓` move line — free in `defaultKeymap`
+- [x] `Shift+Alt+↑/↓` duplicate line — free in `defaultKeymap`
+- [x] `Ctrl+Shift+Alt+↑/↓` column select; `Alt+drag` rectangular selection
+- [x] `Ctrl+Z` undo / `Ctrl+Shift+Z` redo — redo needs an explicit binding on Windows (`historyKeymap` only maps it on macOS)
+- [x] `EditorState.allowMultipleSelections` + `drawSelection()` enabled (both required for multi-cursor)
+
+#### Note persistence
+- [x] `src/lib/noteTitle.ts` — `deriveTitle()` strips Markdown markers so the title isn't `# Shopping list`
+- [x] Editor mounts only after the note loads, so the loaded doc is the initial document and can never trigger a save
+- [x] Load race guard — a slow `getDoc` resolving late can no longer clobber the buffer
+- [x] Flush the pending debounced save on blur and on unmount (previously edits within 500 ms of closing were lost)
+
+#### Cleanup
+- [x] Remove "Sign out" button from `NoteWindow` toolbar — keep it only in the `Dashboard` header
+- [x] Drop Electron's default application menu (pulled forward from Phase 4) — its Edit-role accelerators swallow `Ctrl+Z`/`Ctrl+Shift+Z`/`Ctrl+A` before the renderer sees them and drive native commands CodeMirror does not track; a View-only menu is kept in dev
 
 ---
 
@@ -90,7 +107,7 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 ### Tasks
 
 #### Dashboard improvements
-- [ ] Search bar — client-side filter on `title` and `content` (plain text extracted from TipTap JSON)
+- [ ] Search bar — client-side filter on `title` and `content` (Markdown text; reuse `stripMarkdown()` from `src/lib/noteTitle.ts`)
 - [ ] Sort options: last modified, created, title A–Z
 - [ ] Filter toggle: All / Pinned / Archived
 - [ ] Structure sidebar with "All Notes", "Pinned", "Archived", "Trash" — ready to add Categories section later
@@ -120,7 +137,7 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [ ] Tailwind `dark:` classes throughout
 
 #### Window behavior
-- [ ] Remove native window frame and menu bar: set `frame: false` on all BrowserWindows in `electron/windowManager.ts`; call `Menu.setApplicationMenu(null)` in `electron/main.ts`
+- [ ] Remove native window frame: set `frame: false` on all BrowserWindows in `electron/windowManager.ts` (the menu bar is already gone — done in Phase 2)
 - [ ] Custom title bar on all windows: drag region (`-webkit-app-region: drag`) + custom close button that sends IPC channel `window:close` → `win.close()`; note windows also get a minimize button
 - [ ] Always-on-top toggle per note window (`win.setAlwaysOnTop(bool)` via IPC)
 - [ ] System tray icon: left-click opens dashboard, right-click menu has "New Note" and "Quit"
