@@ -1,6 +1,7 @@
 import { BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import { store, type Bounds } from './store'
+import { startRendererServer, stopRendererServer } from './rendererServer'
 
 const noteWindows = new Map<string, BrowserWindow>()
 let dashboardWindow: BrowserWindow | null = null
@@ -8,17 +9,36 @@ let shortcutsWindow: BrowserWindow | null = null
 
 const BOUNDS_DEBOUNCE_MS = 300
 
+// Base URL every window loads from. In dev it is Vite's server; in production
+// it is our local static server (see initRenderer). Both give an http origin
+// with hostname `localhost`, which Firebase treats as an authorized domain —
+// the reason we no longer load the renderer from file://.
+let rendererBaseUrl: string | null = null
+
 function getPreloadPath(): string {
   return join(__dirname, '../preload/index.js')
 }
 
+/**
+ * Must be awaited once, before any window is created. In production it starts
+ * the local server that serves the built renderer over http://localhost so the
+ * Google sign-in popup works (file:// origins fail with auth/unauthorized-domain).
+ */
+export async function initRenderer(): Promise<void> {
+  const devUrl = process.env['ELECTRON_RENDERER_URL']
+  rendererBaseUrl = devUrl ?? (await startRendererServer(join(__dirname, '../renderer')))
+}
+
+/** Tears down the production renderer server. No-op in dev. */
+export function shutdownRenderer(): void {
+  stopRendererServer()
+}
+
 function loadWindow(win: BrowserWindow, params: string): void {
-  const rendererUrl = process.env['ELECTRON_RENDERER_URL']
-  if (rendererUrl) {
-    win.loadURL(`${rendererUrl}?${params}`)
-  } else {
-    win.loadFile(join(__dirname, '../renderer/index.html'), { search: `?${params}` })
+  if (!rendererBaseUrl) {
+    throw new Error('initRenderer() must be awaited before creating windows')
   }
+  win.loadURL(`${rendererBaseUrl}/?${params}`)
 }
 
 function makeWindow(options: Electron.BrowserWindowConstructorOptions): BrowserWindow {

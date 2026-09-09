@@ -71,7 +71,7 @@ function setupApplicationMenu(): void {
   )
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   setupApplicationMenu()
 
   ipcMain.on('note:open', (_event, id: string) => {
@@ -123,6 +123,11 @@ app.whenReady().then(() => {
   // that's non-fatal, so we don't surface it.
   globalShortcut.register('CommandOrControl+Alt+N', () => windowManager.requestNewNote())
 
+  // Start the renderer host (local http server in production) before any window
+  // loads it. Without this the packaged app serves from file:// and Google
+  // sign-in fails with auth/unauthorized-domain.
+  await windowManager.initRenderer()
+
   windowManager.openDashboard()
 
   const savedNoteIds = store.get('openNoteIds', [])
@@ -144,6 +149,7 @@ app.on('before-quit', () => {
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll()
+  windowManager.shutdownRenderer()
 })
 
 // The app now lives in the tray, so closing every window must NOT quit it.
