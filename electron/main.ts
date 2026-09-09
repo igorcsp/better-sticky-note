@@ -1,14 +1,6 @@
 import { app, ipcMain, Menu } from 'electron'
-import Store from 'electron-store'
 import * as windowManager from './windowManager'
-
-interface StoreSchema {
-  openNoteIds: string[]
-}
-
-const store = new Store<StoreSchema>({
-  defaults: { openNoteIds: [] },
-})
+import { store, type Theme } from './store'
 
 /**
  * Drop Electron's default menu.
@@ -63,6 +55,20 @@ app.whenReady().then(() => {
 
   ipcMain.on('dashboard:open', () => {
     windowManager.openDashboard()
+  })
+
+  ipcMain.on('shortcuts:open', () => {
+    windowManager.openShortcuts()
+  })
+
+  // Theme preference. Read synchronously so the renderer can apply the class
+  // before first paint (no flash); write on change.
+  ipcMain.on('prefs:get-theme', (event) => {
+    event.returnValue = store.get('theme')
+  })
+
+  ipcMain.on('prefs:set-theme', (_event, theme: Theme) => {
+    store.set('theme', theme)
   })
 
   windowManager.openDashboard()

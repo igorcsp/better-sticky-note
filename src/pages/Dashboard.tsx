@@ -14,6 +14,7 @@ import { stripMarkdown } from '../lib/noteTitle'
 import { useNotesStore } from '../store/notesStore'
 import NoteCard from '../components/notes/NoteCard'
 import Sidebar, { type NoteView } from '../components/dashboard/Sidebar'
+import ThemeToggle from '../components/dashboard/ThemeToggle'
 
 interface Props {
   uid: string
@@ -109,22 +110,22 @@ export default function Dashboard({ uid }: Props) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar view={view} counts={counts} onSelect={setView} />
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 border-b bg-white px-6 py-4 shadow-sm">
+        <header className="flex items-center justify-between gap-4 border-b bg-white px-6 py-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
           <div className="flex flex-1 items-center gap-3">
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search notes…"
-              className="w-full max-w-xs rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+              className="w-full max-w-xs rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             />
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
-              className="rounded-lg border border-gray-200 px-2 py-2 text-sm text-gray-600 focus:border-blue-400 focus:outline-none"
+              className="rounded-lg border border-gray-200 px-2 py-2 text-sm text-gray-600 focus:border-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
             >
               <option value="modified">Last modified</option>
               <option value="created">Created</option>
@@ -132,6 +133,14 @@ export default function Dashboard({ uid }: Props) {
             </select>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <button
+              onClick={() => window.electron.openShortcuts()}
+              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              title="Keyboard shortcuts"
+            >
+              Shortcuts
+            </button>
             <button
               onClick={handleNewNote}
               className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600"
@@ -140,7 +149,7 @@ export default function Dashboard({ uid }: Props) {
             </button>
             <button
               onClick={() => signOut(auth)}
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
               Sign out
             </button>
@@ -149,7 +158,7 @@ export default function Dashboard({ uid }: Props) {
         <main className="flex-1 overflow-y-auto p-6">
           {visibleNotes.length === 0 ? (
             <div className="flex h-full items-center justify-center">
-              <p className="text-gray-400">
+              <p className="text-gray-400 dark:text-gray-500">
                 {search.trim() ? 'No notes match your search.' : EMPTY_MESSAGES[view]}
               </p>
             </div>

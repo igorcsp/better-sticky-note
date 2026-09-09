@@ -13,7 +13,10 @@ export const stickyTheme = EditorView.theme({
   '&': {
     height: '100%',
     backgroundColor: 'transparent',
-    fontSize: '14px',
+    // Driven by the per-note font size: NoteWindow sets --note-font-size on an
+    // ancestor, so dragging the slider resizes the text with no CodeMirror
+    // state churn (cursor/undo stay intact).
+    fontSize: 'var(--note-font-size, 14px)',
     color: '#1f2937',
   },
   '&.cm-focused': {

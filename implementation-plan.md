@@ -129,15 +129,15 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 ### Tasks
 
 #### Per-note customization
-- [ ] Color picker in note toolbar — preset palette (8 colors) + custom hex input; saves `color` to Firestore
-- [ ] Font size slider (12–24 px); saves `fontSize` to Firestore
-- [ ] Note window background color follows the note's `color` value
-- [ ] Save confirmed icon in note toolbar — cloud-check icon appears after a successful Firestore write; auto-hides after 2 s
-- [ ] Sync warning icon in note toolbar — warning icon appears on Firestore write failure; persists until the next successful save
+- [x] Color picker in note toolbar — preset palette (8 colors) + custom hex input; saves `color` to Firestore
+- [x] Font size slider (12–24 px); saves `fontSize` to Firestore
+- [x] Note window background color follows the note's `color` value
+- [x] Save confirmed icon in note toolbar — cloud-check icon appears after a successful Firestore write; auto-hides after 2 s
+- [x] Sync warning icon in note toolbar — warning icon appears on Firestore write failure; persists until the next successful save
 
 #### App theme
-- [ ] Light / Dark / System toggle in settings; persisted in `electron-store`
-- [ ] Tailwind `dark:` classes throughout
+- [x] Light / Dark / System toggle in settings; persisted in `electron-store`
+- [x] Tailwind `dark:` classes throughout
 
 #### Window behavior
 - [ ] Remove native window frame: set `frame: false` on all BrowserWindows in `electron/windowManager.ts` (the menu bar is already gone — done in Phase 2)
@@ -145,11 +145,11 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [ ] Always-on-top toggle per note window (`win.setAlwaysOnTop(bool)` via IPC)
 - [ ] System tray icon: left-click opens dashboard, right-click menu has "New Note" and "Quit"
 - [ ] Global hotkey (`Ctrl+Alt+N` default, configurable in settings) calls `createNote()`
-- [ ] Window position + size saved to `electron-store` keyed by `noteId`; restored on next open
-- [ ] Persist note window dimensions on every `resize` event (debounced 300 ms) so each note remembers its size independently
+- [x] Window position + size saved to `electron-store` keyed by `noteId`; restored on next open
+- [x] Persist note window dimensions on every `resize` event (debounced 300 ms) so each note remembers its size independently
 
 #### Dashboard extras
-- [ ] "Keyboard Shortcuts" button in dashboard header opens a `ShortcutsWindow` (`?view=shortcuts`) listing all Edit, View, and Window shortcuts for the editor and app
+- [x] "Keyboard Shortcuts" button in dashboard header opens a `ShortcutsWindow` (`?view=shortcuts`) listing all Edit, View, and Window shortcuts for the editor and app
 
 ---
 

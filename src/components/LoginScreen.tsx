@@ -24,14 +24,14 @@ export default function LoginScreen() {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-50">
-      <div className="flex flex-col items-center gap-6 rounded-xl border border-gray-200 bg-white p-10 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-800">Better Sticky Notes</h1>
-        <p className="text-sm text-gray-500">Sign in to access your notes across devices</p>
+    <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="flex flex-col items-center gap-6 rounded-xl border border-gray-200 bg-white p-10 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">Better Sticky Notes</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Sign in to access your notes across devices</p>
         <button
           onClick={handleSignIn}
           disabled={signing}
-          className="flex items-center gap-3 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:opacity-50"
+          className="flex items-center gap-3 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
         >
           {signing ? 'Opening Google sign-in…' : 'Sign in with Google'}
         </button>

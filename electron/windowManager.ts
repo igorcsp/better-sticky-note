@@ -1,8 +1,12 @@
 import { BrowserWindow, shell } from 'electron'
 import { join } from 'path'
+import { store, type Bounds } from './store'
 
 const noteWindows = new Map<string, BrowserWindow>()
 let dashboardWindow: BrowserWindow | null = null
+let shortcutsWindow: BrowserWindow | null = null
+
+const BOUNDS_DEBOUNCE_MS = 300
 
 function getPreloadPath(): string {
   return join(__dirname, '../preload/index.js')
@@ -39,6 +43,24 @@ function makeWindow(options: Electron.BrowserWindowConstructorOptions): BrowserW
   return win
 }
 
+// Persist a window's bounds (debounced) on resize/move, plus once on close as a
+// safety net. `save` decides where the bounds are stored.
+function trackBounds(win: BrowserWindow, save: (bounds: Bounds) => void): void {
+  let timer: ReturnType<typeof setTimeout> | null = null
+  const schedule = () => {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() => {
+      if (!win.isDestroyed()) save(win.getBounds())
+    }, BOUNDS_DEBOUNCE_MS)
+  }
+  win.on('resize', schedule)
+  win.on('move', schedule)
+  win.on('close', () => {
+    if (timer) clearTimeout(timer)
+    if (!win.isDestroyed()) save(win.getBounds())
+  })
+}
+
 export function openNote(id: string): void {
   const existing = noteWindows.get(id)
   if (existing && !existing.isDestroyed()) {
@@ -46,9 +68,22 @@ export function openNote(id: string): void {
     return
   }
 
-  const win = makeWindow({ width: 350, height: 450, title: 'Note' })
+  const saved = store.get('noteBounds')[id]
+  const win = makeWindow({
+    width: saved?.width ?? 350,
+    height: saved?.height ?? 450,
+    x: saved?.x,
+    y: saved?.y,
+    title: 'Note',
+  })
   loadWindow(win, `view=note&id=${id}`)
   noteWindows.set(id, win)
+
+  trackBounds(win, (bounds) => {
+    const all = store.get('noteBounds')
+    all[id] = bounds
+    store.set('noteBounds', all)
+  })
 
   win.on('closed', () => {
     noteWindows.delete(id)
@@ -67,11 +102,34 @@ export function openDashboard(): void {
     return
   }
 
-  dashboardWindow = makeWindow({ width: 960, height: 640, title: 'Better Sticky Notes' })
+  const saved = store.get('dashboardBounds')
+  dashboardWindow = makeWindow({
+    width: saved?.width ?? 960,
+    height: saved?.height ?? 640,
+    x: saved?.x,
+    y: saved?.y,
+    title: 'Better Sticky Notes',
+  })
   loadWindow(dashboardWindow, 'view=dashboard')
+
+  trackBounds(dashboardWindow, (bounds) => store.set('dashboardBounds', bounds))
 
   dashboardWindow.on('closed', () => {
     dashboardWindow = null
+  })
+}
+
+export function openShortcuts(): void {
+  if (shortcutsWindow && !shortcutsWindow.isDestroyed()) {
+    shortcutsWindow.focus()
+    return
+  }
+
+  shortcutsWindow = makeWindow({ width: 520, height: 660, title: 'Keyboard Shortcuts' })
+  loadWindow(shortcutsWindow, 'view=shortcuts')
+
+  shortcutsWindow.on('closed', () => {
+    shortcutsWindow = null
   })
 }
 

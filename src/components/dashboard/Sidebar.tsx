@@ -15,7 +15,7 @@ const ITEMS: { view: NoteView; label: string; icon: string }[] = [
 
 export default function Sidebar({ view, counts, onSelect }: Props) {
   return (
-    <nav className="flex w-48 flex-col gap-1 border-r bg-white p-3">
+    <nav className="flex w-48 flex-col gap-1 border-r bg-white p-3 dark:border-gray-800 dark:bg-gray-800">
       {ITEMS.map((item) => {
         const active = view === item.view
         return (
@@ -24,8 +24,8 @@ export default function Sidebar({ view, counts, onSelect }: Props) {
             onClick={() => onSelect(item.view)}
             className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors ${
               active
-                ? 'bg-blue-50 font-medium text-blue-700'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-blue-50 font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
             }`}
           >
             <span className="flex items-center gap-2">
