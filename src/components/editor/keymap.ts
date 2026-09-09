@@ -2,6 +2,29 @@ import type { KeyBinding } from '@codemirror/view'
 import type { EditorView } from '@codemirror/view'
 import { addCursorAbove, addCursorBelow, redo } from '@codemirror/commands'
 import { openSearchPanel } from '@codemirror/search'
+import { EditorSelection } from '@codemirror/state'
+
+function selectAllOccurrences(view: EditorView): boolean {
+  const { state } = view
+  const sel = state.selection.main
+  if (sel.empty) return false
+
+  const query = state.sliceDoc(sel.from, sel.to)
+  const text = state.doc.toString()
+  const ranges: ReturnType<typeof EditorSelection.range>[] = []
+
+  let pos = 0
+  while (pos <= text.length - query.length) {
+    const idx = text.indexOf(query, pos)
+    if (idx === -1) break
+    ranges.push(EditorSelection.range(idx, idx + query.length))
+    pos = idx + 1
+  }
+
+  if (ranges.length === 0) return false
+  view.dispatch({ selection: EditorSelection.create(ranges) })
+  return true
+}
 
 /**
  * Opens the find & replace panel and focuses the *replace* field, the way
@@ -23,6 +46,7 @@ function openReplacePanel(view: EditorView): boolean {
  * The bindings CodeMirror does not already provide. Everything else in the
  * VSCode set comes free from defaultKeymap / searchKeymap / historyKeymap:
  *
+ *   Ctrl+F2             selectAllOccurrences      vscodeKeymap (custom)
  *   Ctrl+D              selectNextOccurrence      searchKeymap
  *   Ctrl+F              openSearchPanel           searchKeymap
  *   Ctrl+Alt+Up/Down    addCursorAbove/Below      defaultKeymap
@@ -33,6 +57,7 @@ function openReplacePanel(view: EditorView): boolean {
  *   Alt+drag            rectangular selection     rectangularSelection()
  */
 export const vscodeKeymap: KeyBinding[] = [
+  { key: 'Ctrl-F2', run: selectAllOccurrences, preventDefault: true },
   { key: 'Mod-h', run: openReplacePanel, preventDefault: true },
   // historyKeymap only binds Mod-Shift-z to redo on Mac; on Windows redo is
   // Mod-y. Without this, Ctrl+Shift+Z falls back to the Mod-z binding (the
