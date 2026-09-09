@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AlertTriangle, Check, Pin } from 'lucide-react'
+import { AlertTriangle, Check, Copy, Pin } from 'lucide-react'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { updateNote } from '../lib/firestore'
@@ -176,10 +176,10 @@ export default function NoteWindow({ id, uid }: Props) {
           <SyncIndicator status={syncStatus} />
           <button
             onClick={handleCopy}
-            className="text-xs text-gray-700 hover:underline"
-            title="Copy note to clipboard"
+            className="flex items-center text-gray-700 hover:text-gray-900"
+            title={copied ? 'Copied!' : 'Copy note to clipboard'}
           >
-            {copied ? 'Copied!' : 'Copy'}
+            {copied ? <Check size={14} /> : <Copy size={14} />}
           </button>
           <button
             onClick={handleToggleAlwaysOnTop}
