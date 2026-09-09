@@ -95,6 +95,7 @@ Rules:
 - No period at the end
 - Max ~72 characters total
 - Do not commit unless the user explicitly asks
+- **After every response where files were changed**, output a ready-to-use commit message at the end using the format above, wrapped in a code block. Label it `Suggested commit:`
 
 ---
 

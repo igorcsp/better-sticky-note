@@ -113,6 +113,7 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [ ] Structure sidebar with "All Notes", "Pinned", "Archived", "Trash" — ready to add Categories section later
 
 #### Note actions
+- [ ] Copy-to-clipboard button in note toolbar — copies the full note content (raw Markdown) to the clipboard; shows a brief "Copied!" confirmation
 - [ ] Pin / Unpin (sets `pinned: true`, floats to top in dashboard)
 - [ ] Archive (sets `archived: true`, hides from main list)
 - [ ] Move to Trash (sets `deletedAt: now()`)
@@ -131,6 +132,8 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [ ] Color picker in note toolbar — preset palette (8 colors) + custom hex input; saves `color` to Firestore
 - [ ] Font size slider (12–24 px); saves `fontSize` to Firestore
 - [ ] Note window background color follows the note's `color` value
+- [ ] Save confirmed icon in note toolbar — cloud-check icon appears after a successful Firestore write; auto-hides after 2 s
+- [ ] Sync warning icon in note toolbar — warning icon appears on Firestore write failure; persists until the next successful save
 
 #### App theme
 - [ ] Light / Dark / System toggle in settings; persisted in `electron-store`
@@ -143,6 +146,7 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [ ] System tray icon: left-click opens dashboard, right-click menu has "New Note" and "Quit"
 - [ ] Global hotkey (`Ctrl+Alt+N` default, configurable in settings) calls `createNote()`
 - [ ] Window position + size saved to `electron-store` keyed by `noteId`; restored on next open
+- [ ] Persist note window dimensions on every `resize` event (debounced 300 ms) so each note remembers its size independently
 
 #### Dashboard extras
 - [ ] "Keyboard Shortcuts" button in dashboard header opens a `ShortcutsWindow` (`?view=shortcuts`) listing all Edit, View, and Window shortcuts for the editor and app
@@ -159,6 +163,10 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [ ] Offline banner: detect `navigator.onLine`; show "Working offline — changes will sync when reconnected"
 - [ ] Sync indicator in note toolbar (idle / saving / saved / error)
 - [ ] Handle Firestore write errors with a retry queue
+
+#### Testing
+- [ ] Auth tests: unit-test `authStore` and Firebase Auth flows (sign-in, sign-out, session restore) using mocked Firebase SDK
+- [ ] Note creation tests: test `createNote()`, `updateNote()`, `deleteNote()` against a Firestore emulator or mock
 
 #### GitHub Actions CI
 - [ ] `.github/workflows/ci.yml`: on push to `main` → `npm run typecheck` + `npm run lint`
