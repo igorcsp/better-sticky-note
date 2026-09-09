@@ -155,27 +155,35 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 
 ## Phase 5 — Polish & Distribution
 
-**Goal**: Stable, shippable app with CI/CD.
+**Goal**: Distributable cross-platform app with auto-update and developer-friendly setup docs.
+
+### Distribution model
+- **Friends**: download the installer from GitHub Releases, sign in with Google, notes saved to the project owner's Firebase project. No setup required.
+- **Developers**: clone the repo, create their own Firebase project, fill in `.env`, build their own installer.
 
 ### Tasks
 
 #### Reliability
 - [ ] Offline banner: detect `navigator.onLine`; show "Working offline — changes will sync when reconnected"
-- [ ] Sync indicator in note toolbar (idle / saving / saved / error)
 - [ ] Handle Firestore write errors with a retry queue
 
-#### Testing
-- [ ] Auth tests: unit-test `authStore` and Firebase Auth flows (sign-in, sign-out, session restore) using mocked Firebase SDK
-- [ ] Note creation tests: test `createNote()`, `updateNote()`, `deleteNote()` against a Firestore emulator or mock
+#### Security
+- [ ] Publish Firestore Security Rules: `/users/{uid}/notes/{noteId}` → only readable/writable when `request.auth.uid == uid`; deploy via Firebase Console or CLI
 
-#### GitHub Actions CI
+#### Build & Packaging
+- [ ] `electron-builder` config in `electron-builder.yml` (or `package.json`): `productName`, `appId`, Windows NSIS target, macOS DMG target, Linux AppImage target
+- [ ] App icon: provide `build/icon.ico` (Windows), `build/icon.icns` (macOS), `build/icon.png` 512×512 (Linux) — electron-builder picks the right one per platform
+- [ ] Install `electron-updater`; add update check in `electron/main.ts` (`autoUpdater.checkForUpdatesAndNotify()` on app ready)
+- [ ] Configure `publish` in electron-builder to point to GitHub Releases (`provider: github`)
+
+#### GitHub Actions CI/CD
 - [ ] `.github/workflows/ci.yml`: on push to `main` → `npm run typecheck` + `npm run lint`
-- [ ] `.github/workflows/release.yml`: on `v*` tag → `npm run build` → upload `.exe` to GitHub Releases
-- [ ] Sign the installer (optional, requires a code signing cert; document how to skip)
+- [ ] `.github/workflows/release.yml`: on `v*` tag → matrix job across `windows-latest`, `macos-latest`, `ubuntu-latest` runners → each uploads its installer artifact to the same GitHub Release
+- [ ] Document SmartScreen (Windows) and Gatekeeper (macOS) prompts for unsigned builds — friends need "More info → Run anyway" / "Open anyway" on first launch
 
 #### Documentation
-- [ ] `README.md`: prerequisites, Firebase project setup (step-by-step with screenshots), clone → fill `.env` → `npm install` → `npm run dev`
-- [ ] `.env.example` with all required Firebase config keys and comments
+- [ ] `README.md`: prerequisites, Firebase project setup step-by-step (Console → create project → enable Auth + Firestore → copy config), clone → fill `.env` → `npm install` → `npm run dev`; "Download & Install" section linking to GitHub Releases
+- [ ] `.env.example` with all required `VITE_FIREBASE_*` keys and inline comments
 
 ---
 
@@ -188,4 +196,4 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 | **Phase 2** | Full rich text + VSCode-like editing shortcuts |
 | **Phase 3** | Search, filters, pin, archive, trash |
 | **Phase 4** | Note colors, font size, always-on-top, tray, global hotkey |
-| **Phase 5** | Stable app, CI/CD, distributable Windows installer |
+| **Phase 5** | Cross-platform installer, auto-update, Firestore security rules, docs |
