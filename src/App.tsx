@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from './lib/firebase'
+import { getDoc, doc } from 'firebase/firestore'
+import { auth, db } from './lib/firebase'
 import { createNote } from './lib/firestore'
 import { useAuthStore } from './store/authStore'
 import { usePrefsStore } from './store/prefsStore'
 import LoginScreen from './components/LoginScreen'
+import AccessDenied from './components/AccessDenied'
 import NoteWindow from './pages/NoteWindow'
 import Dashboard from './pages/Dashboard'
 import Shortcuts from './pages/Shortcuts'
@@ -34,11 +36,18 @@ function useApplyTheme() {
 
 export default function App() {
   const { user, loading, setUser, setLoading } = useAuthStore()
+  const [allowed, setAllowed] = useState<boolean | null>(null)
   useApplyTheme()
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u)
+      if (u) {
+        const snap = await getDoc(doc(db, 'allowedUsers', u.uid))
+        setAllowed(snap.exists())
+      } else {
+        setAllowed(null)
+      }
       setLoading(false)
     })
     return unsub
@@ -82,6 +91,8 @@ export default function App() {
   }
 
   if (!user) return <LoginScreen />
+
+  if (allowed === false) return <AccessDenied user={user} />
 
   if (VIEW === 'note' && NOTE_ID) {
     return <NoteWindow id={NOTE_ID} uid={user.uid} />

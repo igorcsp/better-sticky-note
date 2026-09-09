@@ -41,12 +41,40 @@ Sign in with your Google account — notes are private to your account and sync 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Users can read their own invite document to check access status.
+    // Only the Firebase Console / Admin SDK can write here.
+    match /allowedUsers/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Notes are only accessible to users with an active invite.
     match /users/{uid}/notes/{noteId} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, write: if request.auth != null
+        && request.auth.uid == uid
+        && exists(/databases/$(database)/documents/allowedUsers/$(uid));
     }
   }
 }
 ```
+
+6. **Before publishing these rules**, add yourself to the allowlist (see [Managing access](#managing-access)) or you will be locked out immediately.
+
+### Managing access
+
+The app is invite-only. Access is controlled by the `allowedUsers` Firestore collection.
+
+**To grant access to a friend:**
+1. Ask them to open the app and attempt to sign in — this creates their Firebase Auth account.
+2. In [Firebase Console](https://console.firebase.google.com/) → **Authentication** → **Users**, find their email and copy their **UID**.
+3. Go to **Firestore** → open (or create) the `allowedUsers` collection.
+4. Add a document with **Document ID = their UID** and any field, e.g. `email: "friend@gmail.com"`.
+5. They can now sign in immediately — no app restart needed.
+
+**To revoke access:** delete the document from `allowedUsers`.
+
+**To add yourself (bootstrap):** do step 2–4 above with your own UID while the old permissive rules are still active, then publish the new rules.
 
 ### Local development
 
