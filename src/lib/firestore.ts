@@ -26,7 +26,7 @@ export async function createNote(uid: string): Promise<string> {
     title: 'New Note',
     content: '',
     color: '#FFF176',
-    fontSize: 14,
+    fontSize: 12,
     pinned: false,
     archived: false,
     deletedAt: null,

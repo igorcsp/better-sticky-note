@@ -1,3 +1,5 @@
+import { Archive, Pin, StickyNote, Trash2, type LucideIcon } from 'lucide-react'
+
 export type NoteView = 'all' | 'pinned' | 'archived' | 'trash'
 
 interface Props {
@@ -6,11 +8,11 @@ interface Props {
   onSelect: (view: NoteView) => void
 }
 
-const ITEMS: { view: NoteView; label: string; icon: string }[] = [
-  { view: 'all', label: 'All Notes', icon: '🗒️' },
-  { view: 'pinned', label: 'Pinned', icon: '📌' },
-  { view: 'archived', label: 'Archived', icon: '🗄️' },
-  { view: 'trash', label: 'Trash', icon: '🗑️' },
+const ITEMS: { view: NoteView; label: string; icon: LucideIcon }[] = [
+  { view: 'all', label: 'All Notes', icon: StickyNote },
+  { view: 'pinned', label: 'Pinned', icon: Pin },
+  { view: 'archived', label: 'Archived', icon: Archive },
+  { view: 'trash', label: 'Trash', icon: Trash2 },
 ]
 
 export default function Sidebar({ view, counts, onSelect }: Props) {
@@ -29,7 +31,7 @@ export default function Sidebar({ view, counts, onSelect }: Props) {
             }`}
           >
             <span className="flex items-center gap-2">
-              <span aria-hidden>{item.icon}</span>
+              <item.icon size={16} aria-hidden />
               {item.label}
             </span>
             <span className={`text-xs ${active ? 'text-blue-500' : 'text-gray-400'}`}>

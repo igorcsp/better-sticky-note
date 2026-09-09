@@ -171,12 +171,13 @@ export default function Dashboard({ uid }: Props) {
               </p>
             </div>
           ) : (
-            <div className="grid auto-rows-min grid-cols-3 gap-4">
+            <div className="grid auto-rows-min gap-5 [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]">
               {visibleNotes.map((note) => (
                 <NoteCard
                   key={note.id}
                   note={note}
                   view={view}
+                  uid={uid}
                   onOpen={() => window.electron.openNote(note.id)}
                   onCopy={() => navigator.clipboard.writeText(note.content)}
                   onTogglePin={() => updateNote(uid, note.id, { pinned: !note.pinned })}

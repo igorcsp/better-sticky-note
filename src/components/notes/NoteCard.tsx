@@ -1,10 +1,24 @@
 import { useState } from 'react'
+import {
+  Archive,
+  ArchiveRestore,
+  Check,
+  Copy,
+  Pin,
+  PinOff,
+  RotateCcw,
+  Trash2,
+  X,
+  type LucideIcon,
+} from 'lucide-react'
 import type { Note } from '../../types'
 import type { NoteView } from '../dashboard/Sidebar'
+import NoteAppearanceButton from './NoteAppearanceButton'
 
 interface Props {
   note: Note
   view: NoteView
+  uid: string
   onOpen: () => void
   onCopy: () => void
   onTogglePin: () => void
@@ -14,17 +28,17 @@ interface Props {
   onDeleteForever: () => void
 }
 
-// Small square icon button used in the card's hover row. stopPropagation keeps a
-// click on an action from also opening the note.
+// Small icon button used in the card's hover row. stopPropagation keeps a click
+// on an action from also opening the note.
 function IconButton({
   title,
   onClick,
-  children,
+  icon: Icon,
   danger,
 }: {
   title: string
   onClick: () => void
-  children: React.ReactNode
+  icon: LucideIcon
   danger?: boolean
 }) {
   return (
@@ -34,11 +48,11 @@ function IconButton({
         e.stopPropagation()
         onClick()
       }}
-      className={`flex h-6 w-6 items-center justify-center rounded text-xs text-gray-600 hover:bg-black/10 ${
+      className={`flex h-7 w-7 items-center justify-center rounded-md text-gray-600 hover:bg-black/10 ${
         danger ? 'hover:text-red-600' : 'hover:text-gray-900'
       }`}
     >
-      {children}
+      <Icon size={16} />
     </button>
   )
 }
@@ -46,6 +60,7 @@ function IconButton({
 export default function NoteCard({
   note,
   view,
+  uid,
   onOpen,
   onCopy,
   onTogglePin,
@@ -66,43 +81,46 @@ export default function NoteCard({
 
   return (
     <div
-      className="group relative flex cursor-pointer flex-col gap-2 rounded-lg border border-black/10 p-4 shadow-sm transition-shadow hover:shadow-md"
+      className="group relative flex min-h-44 cursor-pointer flex-col gap-2 rounded-xl border border-black/10 p-5 shadow-sm transition-shadow hover:shadow-md"
       style={{ backgroundColor: note.color || '#FFF176' }}
       onClick={onOpen}
     >
-      <p className="truncate pr-6 text-sm font-semibold text-gray-800">
-        {note.pinned && !inTrash && <span className="mr-1" aria-hidden>📌</span>}
+      <p className="flex items-center gap-1.5 truncate pr-8 text-sm font-semibold text-gray-800">
+        {note.pinned && !inTrash && <Pin size={13} className="shrink-0 fill-current" />}
         {note.title || 'Untitled'}
       </p>
-      <p className="line-clamp-3 text-xs text-gray-600">{preview || 'No content'}</p>
+      <p className="line-clamp-4 flex-1 text-xs text-gray-600">{preview || 'No content'}</p>
 
-      <div className="absolute right-2 top-2 hidden items-center gap-0.5 rounded bg-white/60 p-0.5 backdrop-blur-sm group-hover:flex">
+      <div className="absolute right-2 top-2 hidden items-center gap-0.5 rounded-lg bg-white/60 p-1 backdrop-blur-sm group-hover:flex">
         {inTrash ? (
           <>
-            <IconButton title="Restore" onClick={onRestore}>
-              ♻️
-            </IconButton>
-            <IconButton title="Delete forever" onClick={onDeleteForever} danger>
-              🗑️
-            </IconButton>
+            <IconButton title="Restore" onClick={onRestore} icon={RotateCcw} />
+            <IconButton title="Delete forever" onClick={onDeleteForever} icon={Trash2} danger />
           </>
         ) : (
           <>
-            <IconButton title={copied ? 'Copied!' : 'Copy to clipboard'} onClick={handleCopy}>
-              {copied ? '✓' : '📋'}
-            </IconButton>
-            <IconButton title={note.pinned ? 'Unpin' : 'Pin'} onClick={onTogglePin}>
-              {note.pinned ? '📌' : '📍'}
-            </IconButton>
+            <NoteAppearanceButton
+              uid={uid}
+              noteId={note.id}
+              color={note.color || '#FFF176'}
+              fontSize={note.fontSize || 12}
+            />
+            <IconButton
+              title={copied ? 'Copied!' : 'Copy to clipboard'}
+              onClick={handleCopy}
+              icon={copied ? Check : Copy}
+            />
+            <IconButton
+              title={note.pinned ? 'Unpin' : 'Pin'}
+              onClick={onTogglePin}
+              icon={note.pinned ? PinOff : Pin}
+            />
             <IconButton
               title={note.archived ? 'Unarchive' : 'Archive'}
               onClick={onToggleArchive}
-            >
-              {note.archived ? '📤' : '🗄️'}
-            </IconButton>
-            <IconButton title="Move to trash" onClick={onDelete} danger>
-              ✕
-            </IconButton>
+              icon={note.archived ? ArchiveRestore : Archive}
+            />
+            <IconButton title="Move to trash" onClick={onDelete} icon={X} danger />
           </>
         )}
       </div>

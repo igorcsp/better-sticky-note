@@ -3,3 +3,38 @@
 /* Class-based dark mode (Tailwind v4): `dark:` utilities apply when an ancestor
    has the `.dark` class, toggled on <html> by the theme preference. */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Custom scrollbars (Chromium/Electron). Thin, unobtrusive, theme-aware.
+   Note windows keep transparent track so the per-note color shows through. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

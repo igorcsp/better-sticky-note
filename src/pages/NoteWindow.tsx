@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { AlertTriangle, Check, Pin } from 'lucide-react'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { updateNote } from '../lib/firestore'
@@ -22,7 +23,7 @@ const DEBOUNCE_MS = 500
 const FONT_DEBOUNCE_MS = 400
 const SAVED_VISIBLE_MS = 2000
 const DEFAULT_COLOR = '#FFF176'
-const DEFAULT_FONT_SIZE = 14
+const DEFAULT_FONT_SIZE = 12
 
 type SyncStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -182,11 +183,11 @@ export default function NoteWindow({ id, uid }: Props) {
           </button>
           <button
             onClick={handleToggleAlwaysOnTop}
-            className={`text-xs ${alwaysOnTop ? 'opacity-100' : 'opacity-50'} hover:opacity-100`}
+            className={`flex items-center text-gray-700 ${alwaysOnTop ? 'opacity-100' : 'opacity-50'} hover:opacity-100`}
             title={alwaysOnTop ? 'Always on top: on' : 'Always on top: off'}
             aria-pressed={alwaysOnTop}
           >
-            📌
+            <Pin size={14} className={alwaysOnTop ? 'fill-current' : ''} />
           </button>
           <NoteControls
             color={color}
@@ -219,15 +220,15 @@ function SyncIndicator({ status }: { status: SyncStatus }) {
   }
   if (status === 'saved') {
     return (
-      <span className="text-xs text-green-700" title="Saved to cloud">
-        ✓
+      <span className="flex items-center text-green-700" title="Saved to cloud">
+        <Check size={14} />
       </span>
     )
   }
   if (status === 'error') {
     return (
-      <span className="text-xs text-amber-600" title="Sync problem — changes not saved">
-        ⚠
+      <span className="flex items-center text-amber-600" title="Sync problem — changes not saved">
+        <AlertTriangle size={14} />
       </span>
     )
   }

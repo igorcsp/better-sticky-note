@@ -42,9 +42,9 @@ export default function NoteControls({
         <>
           {/* click-away backdrop */}
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-7 z-20 flex w-56 flex-col gap-3 rounded-lg border border-black/10 bg-white p-3 shadow-lg">
+          <div className="absolute right-0 top-7 z-20 flex w-56 flex-col gap-3 rounded-lg border border-black/10 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-800">
             <div>
-              <p className="mb-1.5 text-xs font-medium text-gray-500">Color</p>
+              <p className="mb-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">Color</p>
               <div className="grid grid-cols-8 gap-1">
                 {PRESETS.map((preset) => (
                   <button
@@ -75,13 +75,13 @@ export default function NoteControls({
                     const v = e.target.value
                     if (/^#[0-9a-fA-F]{0,6}$/.test(v)) onColorChange(v)
                   }}
-                  className="w-20 rounded border border-gray-200 px-1.5 py-0.5 text-xs text-gray-700 focus:border-blue-400 focus:outline-none"
+                  className="w-20 rounded border border-gray-200 px-1.5 py-0.5 text-xs text-gray-700 focus:border-blue-400 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                   placeholder="#RRGGBB"
                 />
               </div>
             </div>
             <div>
-              <p className="mb-1.5 text-xs font-medium text-gray-500">
+              <p className="mb-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
                 Font size — {fontSize}px
               </p>
               <input
