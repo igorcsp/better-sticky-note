@@ -107,18 +107,18 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 ### Tasks
 
 #### Dashboard improvements
-- [ ] Search bar — client-side filter on `title` and `content` (Markdown text; reuse `stripMarkdown()` from `src/lib/noteTitle.ts`)
-- [ ] Sort options: last modified, created, title A–Z
-- [ ] Filter toggle: All / Pinned / Archived
-- [ ] Structure sidebar with "All Notes", "Pinned", "Archived", "Trash" — ready to add Categories section later
+- [x] Search bar — client-side filter on `title` and `content` (Markdown text; reuse `stripMarkdown()` from `src/lib/noteTitle.ts`)
+- [x] Sort options: last modified, created, title A–Z
+- [x] Filter toggle: All / Pinned / Archived
+- [x] Structure sidebar with "All Notes", "Pinned", "Archived", "Trash" — ready to add Categories section later
 
 #### Note actions
-- [ ] Copy-to-clipboard button in note toolbar — copies the full note content (raw Markdown) to the clipboard; shows a brief "Copied!" confirmation
-- [ ] Pin / Unpin (sets `pinned: true`, floats to top in dashboard)
-- [ ] Archive (sets `archived: true`, hides from main list)
-- [ ] Move to Trash (sets `deletedAt: now()`)
-- [ ] Trash view: shows deleted notes, "Restore" and "Delete Forever" actions
-- [ ] Purge notes where `deletedAt` is older than 30 days (run on app start)
+- [x] Copy-to-clipboard button in note toolbar — copies the full note content (raw Markdown) to the clipboard; shows a brief "Copied!" confirmation
+- [x] Pin / Unpin (sets `pinned: true`, floats to top in dashboard)
+- [x] Archive (sets `archived: true`, hides from main list)
+- [x] Move to Trash (sets `deletedAt: now()`)
+- [x] Trash view: shows deleted notes, "Restore" and "Delete Forever" actions
+- [x] Purge notes where `deletedAt` is older than 30 days (run on app start)
 
 ---
 

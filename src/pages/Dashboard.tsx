@@ -1,23 +1,107 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { signOut } from 'firebase/auth'
 import { auth } from '../lib/firebase'
-import { createNote, deleteNote, subscribeToNotes } from '../lib/firestore'
+import {
+  createNote,
+  deleteNote,
+  deleteNoteForever,
+  purgeExpiredTrash,
+  restoreNote,
+  subscribeToNotes,
+  updateNote,
+} from '../lib/firestore'
+import { stripMarkdown } from '../lib/noteTitle'
 import { useNotesStore } from '../store/notesStore'
 import NoteCard from '../components/notes/NoteCard'
+import Sidebar, { type NoteView } from '../components/dashboard/Sidebar'
 
 interface Props {
   uid: string
 }
 
+type SortKey = 'modified' | 'created' | 'title'
+
+const EMPTY_MESSAGES: Record<NoteView, string> = {
+  all: 'No notes yet — click "+ New Note" to start.',
+  pinned: 'No pinned notes.',
+  archived: 'No archived notes.',
+  trash: 'Trash is empty.',
+}
+
+// Milliseconds from a Firestore Timestamp (or 0 while the server value is pending).
+function toMillis(ts: { toMillis?: () => number } | null | undefined): number {
+  return ts?.toMillis ? ts.toMillis() : 0
+}
+
 export default function Dashboard({ uid }: Props) {
   const { notes, setNotes } = useNotesStore()
+  const [view, setView] = useState<NoteView>('all')
+  const [search, setSearch] = useState('')
+  const [sort, setSort] = useState<SortKey>('modified')
 
   useEffect(() => {
     const unsub = subscribeToNotes(uid, setNotes)
+    // Clear out notes trashed more than 30 days ago. Fire-and-forget — a failure
+    // here must not block the dashboard from rendering.
+    purgeExpiredTrash(uid).catch((err) => console.error('Trash purge failed:', err))
     return unsub
   }, [uid, setNotes])
 
-  const visibleNotes = notes.filter((n) => !n.deletedAt && !n.archived)
+  const counts = useMemo<Record<NoteView, number>>(() => {
+    const c = { all: 0, pinned: 0, archived: 0, trash: 0 }
+    for (const n of notes) {
+      if (n.deletedAt) {
+        c.trash++
+      } else if (n.archived) {
+        c.archived++
+      } else {
+        c.all++
+        if (n.pinned) c.pinned++
+      }
+    }
+    return c
+  }, [notes])
+
+  const visibleNotes = useMemo(() => {
+    const inBucket = notes.filter((n) => {
+      switch (view) {
+        case 'all':
+          return !n.deletedAt && !n.archived
+        case 'pinned':
+          return !n.deletedAt && !n.archived && n.pinned
+        case 'archived':
+          return !n.deletedAt && n.archived
+        case 'trash':
+          return !!n.deletedAt
+      }
+    })
+
+    const q = search.trim().toLowerCase()
+    const matched = q
+      ? inBucket.filter((n) => {
+          const haystack = `${n.title}\n${stripMarkdown(n.content)}`.toLowerCase()
+          return haystack.includes(q)
+        })
+      : inBucket
+
+    const sorted = [...matched].sort((a, b) => {
+      switch (sort) {
+        case 'created':
+          return toMillis(b.createdAt) - toMillis(a.createdAt)
+        case 'title':
+          return (a.title || '').localeCompare(b.title || '')
+        case 'modified':
+        default:
+          return toMillis(b.updatedAt) - toMillis(a.updatedAt)
+      }
+    })
+
+    // Float pinned notes to the top in the views where pinning is meaningful.
+    if (view === 'all' || view === 'pinned') {
+      sorted.sort((a, b) => Number(b.pinned) - Number(a.pinned))
+    }
+    return sorted
+  }, [notes, view, search, sort])
 
   async function handleNewNote() {
     const id = await createNote(uid)
@@ -25,42 +109,76 @@ export default function Dashboard({ uid }: Props) {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
-      <header className="flex items-center justify-between border-b bg-white px-6 py-4 shadow-sm">
-        <h1 className="text-lg font-semibold text-gray-800">All Notes</h1>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={handleNewNote}
-            className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600"
-          >
-            + New Note
-          </button>
-          <button
-            onClick={() => signOut(auth)}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
-            Sign out
-          </button>
-        </div>
-      </header>
-      <main className="flex-1 overflow-y-auto p-6">
-        {visibleNotes.length === 0 ? (
-          <div className="flex h-full items-center justify-center">
-            <p className="text-gray-400">No notes yet — click &ldquo;+ New Note&rdquo; to start.</p>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar view={view} counts={counts} onSelect={setView} />
+      <div className="flex flex-1 flex-col">
+        <header className="flex items-center justify-between gap-4 border-b bg-white px-6 py-4 shadow-sm">
+          <div className="flex flex-1 items-center gap-3">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search notes…"
+              className="w-full max-w-xs rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+            />
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              className="rounded-lg border border-gray-200 px-2 py-2 text-sm text-gray-600 focus:border-blue-400 focus:outline-none"
+            >
+              <option value="modified">Last modified</option>
+              <option value="created">Created</option>
+              <option value="title">Title A–Z</option>
+            </select>
           </div>
-        ) : (
-          <div className="grid auto-rows-min grid-cols-3 gap-4">
-            {visibleNotes.map((note) => (
-              <NoteCard
-                key={note.id}
-                note={note}
-                onOpen={() => window.electron.openNote(note.id)}
-                onDelete={() => deleteNote(uid, note.id)}
-              />
-            ))}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleNewNote}
+              className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600"
+            >
+              + New Note
+            </button>
+            <button
+              onClick={() => signOut(auth)}
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              Sign out
+            </button>
           </div>
-        )}
-      </main>
+        </header>
+        <main className="flex-1 overflow-y-auto p-6">
+          {visibleNotes.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-gray-400">
+                {search.trim() ? 'No notes match your search.' : EMPTY_MESSAGES[view]}
+              </p>
+            </div>
+          ) : (
+            <div className="grid auto-rows-min grid-cols-3 gap-4">
+              {visibleNotes.map((note) => (
+                <NoteCard
+                  key={note.id}
+                  note={note}
+                  view={view}
+                  onOpen={() => window.electron.openNote(note.id)}
+                  onCopy={() => navigator.clipboard.writeText(note.content)}
+                  onTogglePin={() => updateNote(uid, note.id, { pinned: !note.pinned })}
+                  onToggleArchive={() =>
+                    updateNote(uid, note.id, { archived: !note.archived })
+                  }
+                  onDelete={() => deleteNote(uid, note.id)}
+                  onRestore={() => restoreNote(uid, note.id)}
+                  onDeleteForever={() => {
+                    if (window.confirm('Delete this note forever? This cannot be undone.')) {
+                      deleteNoteForever(uid, note.id)
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   )
 }

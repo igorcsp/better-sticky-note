@@ -21,6 +21,10 @@ export default function NoteWindow({ id, uid }: Props) {
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingRef = useRef<string | null>(null)
+  // Latest editor text, seeded from the loaded doc — used by the Copy button,
+  // which must reflect unsaved edits too.
+  const currentTextRef = useRef('')
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -29,7 +33,9 @@ export default function NoteWindow({ id, uid }: Props) {
       // Guard against a slow read resolving after the user has started typing
       // (or after the window has been closed).
       if (cancelled) return
-      setInitialDoc(snap.exists() ? ((snap.data().content as string) ?? '') : '')
+      const content = snap.exists() ? ((snap.data().content as string) ?? '') : ''
+      currentTextRef.current = content
+      setInitialDoc(content)
     })
     return () => {
       cancelled = true
@@ -46,6 +52,7 @@ export default function NoteWindow({ id, uid }: Props) {
   const handleChange = useCallback(
     (text: string) => {
       pendingRef.current = text
+      currentTextRef.current = text
       if (timerRef.current) clearTimeout(timerRef.current)
       timerRef.current = setTimeout(flush, DEBOUNCE_MS)
     },
@@ -59,6 +66,12 @@ export default function NoteWindow({ id, uid }: Props) {
     if (timerRef.current) clearTimeout(timerRef.current)
     flush()
   }, [flush])
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(currentTextRef.current)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }, [])
 
   const flushRef = useRef(flush)
   flushRef.current = flush
@@ -85,6 +98,13 @@ export default function NoteWindow({ id, uid }: Props) {
           className="text-xs text-yellow-800 hover:underline"
         >
           All Notes
+        </button>
+        <button
+          onClick={handleCopy}
+          className="text-xs text-yellow-800 hover:underline"
+          title="Copy note to clipboard"
+        >
+          {copied ? 'Copied!' : 'Copy'}
         </button>
       </div>
       {initialDoc === null ? (
