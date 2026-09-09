@@ -53,7 +53,16 @@ export function noteExtensions({
     EditorState.allowMultipleSelections.of(true),
     EditorView.lineWrapping,
 
-    markdown({ base: markdownLanguage, codeLanguages: noteCodeLanguages }),
+    // Remove two block rules that misfire on pasted plain text:
+    //  - SetextHeading: a line followed by `---`/`===` becoming a big heading
+    //    (notes are full of `----`/`====` separators and `=`-formulas).
+    //  - IndentedCode: tab/4-space-indented lines becoming a monospace code
+    //    block. `#` headings, `**bold**`, and fenced ``` code still work.
+    markdown({
+      base: markdownLanguage,
+      codeLanguages: noteCodeLanguages,
+      extensions: [{ remove: ['SetextHeading', 'IndentedCode'] }],
+    }),
     syntaxHighlighting(stickyHighlightStyle),
     fencedCodeStyling,
 
