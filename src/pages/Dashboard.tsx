@@ -17,6 +17,7 @@ import NoteCard from '../components/notes/NoteCard'
 import Sidebar, { type NoteView } from '../components/dashboard/Sidebar'
 import ThemeToggle from '../components/dashboard/ThemeToggle'
 import WindowControls from '../components/WindowControls'
+import OfflineBanner from '../components/OfflineBanner'
 
 const DRAG = { WebkitAppRegion: 'drag' } as React.CSSProperties
 const NO_DRAG = { WebkitAppRegion: 'no-drag' } as React.CSSProperties
@@ -171,6 +172,7 @@ export default function Dashboard({ uid }: Props) {
             <WindowControls />
           </div>
         </header>
+        <OfflineBanner />
         <main className="flex-1 overflow-y-auto p-6">
           {visibleNotes.length === 0 ? (
             <div className="flex h-full items-center justify-center">

@@ -8,6 +8,7 @@ import type { Note } from '../types'
 import NoteEditor from '../components/editor/NoteEditor'
 import NoteControls from '../components/notes/NoteControls'
 import WindowControls from '../components/WindowControls'
+import OfflineBanner from '../components/OfflineBanner'
 
 // The title bar is draggable; its interactive controls must opt back out or the
 // drag region swallows their clicks.
@@ -198,6 +199,7 @@ export default function NoteWindow({ id, uid }: Props) {
         </div>
         <WindowControls minimize />
       </div>
+      <OfflineBanner />
       {initialDoc === null ? (
         <div className="flex flex-1 items-center justify-center">
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />

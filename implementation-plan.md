@@ -164,26 +164,26 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 ### Tasks
 
 #### Reliability
-- [ ] Offline banner: detect `navigator.onLine`; show "Working offline — changes will sync when reconnected"
+- [x] Offline banner: detect `navigator.onLine`; show "Working offline — changes will sync when reconnected"
 - [ ] Handle Firestore write errors with a retry queue
 
 #### Security
 - [ ] Publish Firestore Security Rules: `/users/{uid}/notes/{noteId}` → only readable/writable when `request.auth.uid == uid`; deploy via Firebase Console or CLI
 
 #### Build & Packaging
-- [ ] `electron-builder` config in `electron-builder.yml` (or `package.json`): `productName`, `appId`, Windows NSIS target, macOS DMG target, Linux AppImage target
-- [ ] App icon: provide `build/icon.ico` (Windows), `build/icon.icns` (macOS), `build/icon.png` 512×512 (Linux) — electron-builder picks the right one per platform
-- [ ] Install `electron-updater`; add update check in `electron/main.ts` (`autoUpdater.checkForUpdatesAndNotify()` on app ready)
-- [ ] Configure `publish` in electron-builder to point to GitHub Releases (`provider: github`)
+- [x] `electron-builder` config in `electron-builder.yml`: `productName`, `appId`, Windows NSIS target, macOS DMG target, Linux AppImage target
+- [x] App icon: `build/icon.ico` (Windows), `build/icon.icns` (macOS), `build/icon.png` 512×512 (Linux)
+- [x] Install `electron-updater`; add `autoUpdater.checkForUpdatesAndNotify()` in `electron/main.ts` (production-only guard)
+- [x] Configure `publish: github` in `electron-builder.yml` pointing to `igorcsp/better-sticky-note`
 
 #### GitHub Actions CI/CD
-- [ ] `.github/workflows/ci.yml`: on push to `main` → `npm run typecheck` + `npm run lint`
-- [ ] `.github/workflows/release.yml`: on `v*` tag → matrix job across `windows-latest`, `macos-latest`, `ubuntu-latest` runners → each uploads its installer artifact to the same GitHub Release
-- [ ] Document SmartScreen (Windows) and Gatekeeper (macOS) prompts for unsigned builds — friends need "More info → Run anyway" / "Open anyway" on first launch
+- [x] `.github/workflows/ci.yml`: on push to `main` → `npm run typecheck`
+- [x] `.github/workflows/release.yml`: on `v*` tag → matrix job across `windows-latest`, `macos-latest`, `ubuntu-latest`
+- [x] Document SmartScreen (Windows) and Gatekeeper (macOS) prompts for unsigned builds — in `README.md`
 
 #### Documentation
-- [ ] `README.md`: prerequisites, Firebase project setup step-by-step (Console → create project → enable Auth + Firestore → copy config), clone → fill `.env` → `npm install` → `npm run dev`; "Download & Install" section linking to GitHub Releases
-- [ ] `.env.example` with all required `VITE_FIREBASE_*` keys and inline comments
+- [x] `README.md`: prerequisites, Firebase project setup, dev setup, "Download & Install" section with SmartScreen/Gatekeeper notes
+- [x] `.env.example` with all required `VITE_FIREBASE_*` keys and inline comments
 
 ---
 

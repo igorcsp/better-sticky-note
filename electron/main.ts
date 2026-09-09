@@ -1,4 +1,5 @@
 import { app, ipcMain, Menu, Tray, BrowserWindow, globalShortcut, nativeImage } from 'electron'
+import { autoUpdater } from 'electron-updater'
 import * as windowManager from './windowManager'
 import { store, type Theme } from './store'
 import { TRAY_ICON_DATA_URL } from './trayIcon'
@@ -127,6 +128,12 @@ app.whenReady().then(() => {
   const savedNoteIds = store.get('openNoteIds', [])
   for (const id of savedNoteIds) {
     windowManager.openNote(id)
+  }
+
+  // Auto-update runs in production only; dev mode is identified by the Vite
+  // dev server URL being set in the environment.
+  if (!process.env['ELECTRON_RENDERER_URL']) {
+    autoUpdater.checkForUpdatesAndNotify()
   }
 })
 
