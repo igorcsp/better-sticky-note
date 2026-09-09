@@ -42,11 +42,15 @@ export default function Sidebar({ view, counts, onSelect }: Props) {
       <button
         onClick={() => setCollapsed((v) => !v)}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        className={`mb-1 flex items-center rounded-lg px-3 py-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 ${
-          collapsed ? 'justify-center' : 'justify-end'
+        className={`mb-1 flex items-center rounded-lg py-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 ${
+          collapsed ? 'justify-center px-0' : 'justify-end px-3'
         }`}
       >
-        {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+        {collapsed ? (
+          <PanelLeftOpen size={16} className="shrink-0" />
+        ) : (
+          <PanelLeftClose size={16} className="shrink-0" />
+        )}
       </button>
 
       {ITEMS.map((item) => {
@@ -56,8 +60,8 @@ export default function Sidebar({ view, counts, onSelect }: Props) {
             key={item.view}
             onClick={() => onSelect(item.view)}
             title={collapsed ? `${item.label} (${counts[item.view]})` : undefined}
-            className={`flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${
-              collapsed ? 'justify-center' : 'justify-between'
+            className={`flex items-center rounded-lg py-2 text-sm transition-colors ${
+              collapsed ? 'justify-center px-0' : 'justify-between px-3'
             } ${
               active
                 ? 'bg-blue-50 font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-300'
@@ -65,7 +69,7 @@ export default function Sidebar({ view, counts, onSelect }: Props) {
             }`}
           >
             <span className="flex items-center gap-2">
-              <item.icon size={16} aria-hidden />
+              <item.icon size={16} aria-hidden className="shrink-0" />
               {!collapsed && item.label}
             </span>
             {!collapsed && (
