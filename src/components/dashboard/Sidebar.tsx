@@ -1,4 +1,13 @@
-import { Archive, Pin, StickyNote, Trash2, type LucideIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import {
+  Archive,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Pin,
+  StickyNote,
+  Trash2,
+  type LucideIcon,
+} from 'lucide-react'
 
 export type NoteView = 'all' | 'pinned' | 'archived' | 'trash'
 
@@ -15,16 +24,41 @@ const ITEMS: { view: NoteView; label: string; icon: LucideIcon }[] = [
   { view: 'trash', label: 'Trash', icon: Trash2 },
 ]
 
+const STORAGE_KEY = 'sidebarCollapsed'
+
 export default function Sidebar({ view, counts, onSelect }: Props) {
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem(STORAGE_KEY) === '1')
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, collapsed ? '1' : '0')
+  }, [collapsed])
+
   return (
-    <nav className="flex w-48 flex-col gap-1 border-r bg-white p-3 dark:border-gray-800 dark:bg-gray-800">
+    <nav
+      className={`flex flex-col gap-1 border-r bg-white p-3 transition-[width] dark:border-gray-800 dark:bg-gray-800 ${
+        collapsed ? 'w-14' : 'w-48'
+      }`}
+    >
+      <button
+        onClick={() => setCollapsed((v) => !v)}
+        title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        className={`mb-1 flex items-center rounded-lg px-3 py-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 ${
+          collapsed ? 'justify-center' : 'justify-end'
+        }`}
+      >
+        {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+      </button>
+
       {ITEMS.map((item) => {
         const active = view === item.view
         return (
           <button
             key={item.view}
             onClick={() => onSelect(item.view)}
-            className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors ${
+            title={collapsed ? `${item.label} (${counts[item.view]})` : undefined}
+            className={`flex items-center rounded-lg px-3 py-2 text-sm transition-colors ${
+              collapsed ? 'justify-center' : 'justify-between'
+            } ${
               active
                 ? 'bg-blue-50 font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-300'
                 : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -32,11 +66,13 @@ export default function Sidebar({ view, counts, onSelect }: Props) {
           >
             <span className="flex items-center gap-2">
               <item.icon size={16} aria-hidden />
-              {item.label}
+              {!collapsed && item.label}
             </span>
-            <span className={`text-xs ${active ? 'text-blue-500' : 'text-gray-400'}`}>
-              {counts[item.view]}
-            </span>
+            {!collapsed && (
+              <span className={`text-xs ${active ? 'text-blue-500' : 'text-gray-400'}`}>
+                {counts[item.view]}
+              </span>
+            )}
           </button>
         )
       })}
