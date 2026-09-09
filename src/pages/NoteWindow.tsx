@@ -6,6 +6,12 @@ import { deriveTitle } from '../lib/noteTitle'
 import type { Note } from '../types'
 import NoteEditor from '../components/editor/NoteEditor'
 import NoteControls from '../components/notes/NoteControls'
+import WindowControls from '../components/WindowControls'
+
+// The title bar is draggable; its interactive controls must opt back out or the
+// drag region swallows their clicks.
+const DRAG = { WebkitAppRegion: 'drag' } as React.CSSProperties
+const NO_DRAG = { WebkitAppRegion: 'no-drag' } as React.CSSProperties
 
 interface Props {
   id: string
@@ -29,6 +35,7 @@ export default function NoteWindow({ id, uid }: Props) {
   const [color, setColor] = useState(DEFAULT_COLOR)
   const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE)
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle')
+  const [alwaysOnTop, setAlwaysOnTop] = useState(false)
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fontTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -125,6 +132,10 @@ export default function NoteWindow({ id, uid }: Props) {
     setTimeout(() => setCopied(false), 1500)
   }, [])
 
+  const handleToggleAlwaysOnTop = useCallback(async () => {
+    setAlwaysOnTop(await window.electron.toggleAlwaysOnTop())
+  }, [])
+
   const flushRef = useRef(flush)
   flushRef.current = flush
 
@@ -149,14 +160,18 @@ export default function NoteWindow({ id, uid }: Props) {
       className="flex h-screen flex-col"
       style={{ backgroundColor: color, ['--note-font-size' as string]: `${fontSize}px` }}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-black/10 bg-black/5 px-3 py-2">
+      <div
+        className="flex items-center justify-between gap-2 border-b border-black/10 bg-black/5 pl-3"
+        style={DRAG}
+      >
         <button
           onClick={() => window.electron.openDashboard()}
-          className="text-xs text-gray-700 hover:underline"
+          className="py-2 text-xs text-gray-700 hover:underline"
+          style={NO_DRAG}
         >
           All Notes
         </button>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 py-2" style={NO_DRAG}>
           <SyncIndicator status={syncStatus} />
           <button
             onClick={handleCopy}
@@ -165,6 +180,14 @@ export default function NoteWindow({ id, uid }: Props) {
           >
             {copied ? 'Copied!' : 'Copy'}
           </button>
+          <button
+            onClick={handleToggleAlwaysOnTop}
+            className={`text-xs ${alwaysOnTop ? 'opacity-100' : 'opacity-50'} hover:opacity-100`}
+            title={alwaysOnTop ? 'Always on top: on' : 'Always on top: off'}
+            aria-pressed={alwaysOnTop}
+          >
+            📌
+          </button>
           <NoteControls
             color={color}
             fontSize={fontSize}
@@ -172,6 +195,7 @@ export default function NoteWindow({ id, uid }: Props) {
             onFontSizeChange={handleFontSizeChange}
           />
         </div>
+        <WindowControls minimize />
       </div>
       {initialDoc === null ? (
         <div className="flex flex-1 items-center justify-center">

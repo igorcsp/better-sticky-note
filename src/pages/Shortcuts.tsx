@@ -1,3 +1,5 @@
+import WindowControls from '../components/WindowControls'
+
 interface Shortcut {
   keys: string
   action: string
@@ -55,13 +57,21 @@ function Section({ title, items }: { title: string; items: Shortcut[] }) {
 
 export default function Shortcuts() {
   return (
-    <div className="h-screen overflow-y-auto bg-gray-50 p-6 dark:bg-gray-900">
-      <h1 className="mb-5 text-lg font-semibold text-gray-800 dark:text-gray-100">
-        Keyboard Shortcuts
-      </h1>
-      <Section title="Editing" items={EDIT} />
-      <Section title="View" items={VIEW} />
-      <Section title="Window" items={WINDOW} />
+    <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-900">
+      <div
+        className="flex items-center justify-between border-b border-gray-200 bg-white pl-4 dark:border-gray-800 dark:bg-gray-800"
+        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      >
+        <span className="py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
+          Keyboard Shortcuts
+        </span>
+        <WindowControls />
+      </div>
+      <div className="flex-1 overflow-y-auto p-6">
+        <Section title="Editing" items={EDIT} />
+        <Section title="View" items={VIEW} />
+        <Section title="Window" items={WINDOW} />
+      </div>
     </div>
   )
 }

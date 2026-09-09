@@ -24,6 +24,9 @@ function loadWindow(win: BrowserWindow, params: string): void {
 function makeWindow(options: Electron.BrowserWindowConstructorOptions): BrowserWindow {
   const win = new BrowserWindow({
     ...options,
+    // Frameless custom chrome. `transparent` stays false so Windows keeps native
+    // edge-resizing (transparent frameless windows lose it).
+    frame: false,
     webPreferences: {
       preload: getPreloadPath(),
       contextIsolation: true,
@@ -116,6 +119,21 @@ export function openDashboard(): void {
 
   dashboardWindow.on('closed', () => {
     dashboardWindow = null
+  })
+}
+
+// New note from the tray/hotkey. createNote is renderer-only (needs Firebase +
+// the signed-in user), so we ask the dashboard renderer to do it. Open the
+// dashboard first if needed, then signal once its contents have loaded.
+export function requestNewNote(): void {
+  if (dashboardWindow && !dashboardWindow.isDestroyed()) {
+    dashboardWindow.focus()
+    dashboardWindow.webContents.send('new-note')
+    return
+  }
+  openDashboard()
+  dashboardWindow!.webContents.once('did-finish-load', () => {
+    dashboardWindow?.webContents.send('new-note')
   })
 }
 

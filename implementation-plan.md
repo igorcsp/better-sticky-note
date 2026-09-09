@@ -140,11 +140,11 @@ The MVP is a strict subset of Phase 1 — ship it first, then continue.
 - [x] Tailwind `dark:` classes throughout
 
 #### Window behavior
-- [ ] Remove native window frame: set `frame: false` on all BrowserWindows in `electron/windowManager.ts` (the menu bar is already gone — done in Phase 2)
-- [ ] Custom title bar on all windows: drag region (`-webkit-app-region: drag`) + custom close button that sends IPC channel `window:close` → `win.close()`; note windows also get a minimize button
-- [ ] Always-on-top toggle per note window (`win.setAlwaysOnTop(bool)` via IPC)
-- [ ] System tray icon: left-click opens dashboard, right-click menu has "New Note" and "Quit"
-- [ ] Global hotkey (`Ctrl+Alt+N` default, configurable in settings) calls `createNote()`
+- [x] Remove native window frame: set `frame: false` on all BrowserWindows in `electron/windowManager.ts` (the menu bar is already gone — done in Phase 2)
+- [x] Custom title bar on all windows: drag region (`-webkit-app-region: drag`) + custom close button that sends IPC channel `window:close` → `win.close()`; note windows also get a minimize button
+- [x] Always-on-top toggle per note window (`win.setAlwaysOnTop(bool)` via IPC)
+- [x] System tray icon: left-click opens dashboard, right-click menu has "New Note" and "Quit"
+- [x] Global hotkey (`Ctrl+Alt+N` default, configurable in settings) calls `createNote()` — hotkey wired; per-user rebinding deferred to a later settings UI
 - [x] Window position + size saved to `electron-store` keyed by `noteId`; restored on next open
 - [x] Persist note window dimensions on every `resize` event (debounced 300 ms) so each note remembers its size independently
 

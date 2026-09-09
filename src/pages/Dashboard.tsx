@@ -15,6 +15,10 @@ import { useNotesStore } from '../store/notesStore'
 import NoteCard from '../components/notes/NoteCard'
 import Sidebar, { type NoteView } from '../components/dashboard/Sidebar'
 import ThemeToggle from '../components/dashboard/ThemeToggle'
+import WindowControls from '../components/WindowControls'
+
+const DRAG = { WebkitAppRegion: 'drag' } as React.CSSProperties
+const NO_DRAG = { WebkitAppRegion: 'no-drag' } as React.CSSProperties
 
 interface Props {
   uid: string
@@ -113,8 +117,11 @@ export default function Dashboard({ uid }: Props) {
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar view={view} counts={counts} onSelect={setView} />
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 border-b bg-white px-6 py-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
-          <div className="flex flex-1 items-center gap-3">
+        <header
+          className="flex items-center justify-between gap-4 border-b bg-white py-4 pl-6 shadow-sm dark:border-gray-800 dark:bg-gray-800"
+          style={DRAG}
+        >
+          <div className="flex flex-1 items-center gap-3" style={NO_DRAG}>
             <input
               type="search"
               value={search}
@@ -132,7 +139,7 @@ export default function Dashboard({ uid }: Props) {
               <option value="title">Title A–Z</option>
             </select>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4" style={NO_DRAG}>
             <ThemeToggle />
             <button
               onClick={() => window.electron.openShortcuts()}
@@ -154,6 +161,7 @@ export default function Dashboard({ uid }: Props) {
               Sign out
             </button>
           </div>
+          <WindowControls />
         </header>
         <main className="flex-1 overflow-y-auto p-6">
           {visibleNotes.length === 0 ? (

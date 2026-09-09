@@ -10,4 +10,15 @@ contextBridge.exposeInMainWorld('electron', {
   // Synchronous so App can apply the theme class before first paint.
   getTheme: (): Theme => ipcRenderer.sendSync('prefs:get-theme'),
   setTheme: (theme: Theme) => ipcRenderer.send('prefs:set-theme', theme),
+  // Frameless window controls — act on the calling window.
+  closeSelf: () => ipcRenderer.send('window:close'),
+  minimizeSelf: () => ipcRenderer.send('window:minimize'),
+  toggleAlwaysOnTop: (): Promise<boolean> =>
+    ipcRenderer.invoke('window:toggle-always-on-top'),
+  // Tray/hotkey new-note signal. Returns an unsubscribe function.
+  onNewNote: (cb: () => void) => {
+    const listener = () => cb()
+    ipcRenderer.on('new-note', listener)
+    return () => ipcRenderer.removeListener('new-note', listener)
+  },
 })

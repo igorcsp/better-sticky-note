@@ -1,12 +1,17 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './lib/firebase'
+import { createNote } from './lib/firestore'
 import { useAuthStore } from './store/authStore'
 import { usePrefsStore } from './store/prefsStore'
 import LoginScreen from './components/LoginScreen'
 import NoteWindow from './pages/NoteWindow'
 import Dashboard from './pages/Dashboard'
 import Shortcuts from './pages/Shortcuts'
+
+// This window's view is fixed for its lifetime (set via URL query at open time).
+const VIEW = new URLSearchParams(window.location.search).get('view')
+const NOTE_ID = new URLSearchParams(window.location.search).get('id')
 
 // Keep the <html> `dark` class in sync with the theme preference. On 'system'
 // we follow the OS and react to changes live.
@@ -39,6 +44,35 @@ export default function App() {
     return unsub
   }, [setUser, setLoading])
 
+  // Tray/hotkey "New Note" is handled by the dashboard window (createNote needs
+  // the signed-in user). If auth isn't ready yet, buffer the request and run it
+  // once the user resolves.
+  const userRef = useRef(user)
+  userRef.current = user
+  const pendingNewNote = useRef(false)
+
+  const doCreateNote = useCallback(async () => {
+    const u = userRef.current
+    if (!u) {
+      pendingNewNote.current = true
+      return
+    }
+    const id = await createNote(u.uid)
+    window.electron.openNote(id)
+  }, [])
+
+  useEffect(() => {
+    if (VIEW === 'note' || VIEW === 'shortcuts') return
+    return window.electron?.onNewNote?.(() => doCreateNote())
+  }, [doCreateNote])
+
+  useEffect(() => {
+    if (user && pendingNewNote.current) {
+      pendingNewNote.current = false
+      doCreateNote()
+    }
+  }, [user, doCreateNote])
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -49,15 +83,11 @@ export default function App() {
 
   if (!user) return <LoginScreen />
 
-  const params = new URLSearchParams(window.location.search)
-  const view = params.get('view')
-  const noteId = params.get('id')
-
-  if (view === 'note' && noteId) {
-    return <NoteWindow id={noteId} uid={user.uid} />
+  if (VIEW === 'note' && NOTE_ID) {
+    return <NoteWindow id={NOTE_ID} uid={user.uid} />
   }
 
-  if (view === 'shortcuts') {
+  if (VIEW === 'shortcuts') {
     return <Shortcuts />
   }
 
