@@ -12,11 +12,32 @@ Go to [Releases](https://github.com/igorcsp/better-sticky-note/releases) and dow
 | macOS | `Better-Sticky-Notes-x.x.x.dmg` |
 | Linux | `Better-Sticky-Notes-x.x.x.AppImage` |
 
-Sign in with your Google account — notes are private to your account and sync across devices.
+**Access is invite-only.** The releases above connect to the owner's database. If you sign in without an invite you will see an "Access restricted" screen. To use the app, ask the owner for access — or set up your own Firebase project by following the [Developer Setup](#developer-setup) below.
 
 > **First-launch warnings**
 > - **Windows**: SmartScreen may show "Windows protected your PC." Click **More info → Run anyway**.
 > - **macOS**: Gatekeeper may block the app. Go to **System Settings → Privacy & Security** and click **Open Anyway**.
+
+---
+
+## Keyboard shortcuts
+
+The editor uses VSCode-style keybindings throughout.
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl+F` | Find |
+| `Ctrl+H` | Find & Replace (focused on replace field) |
+| `Ctrl+D` | Select next occurrence |
+| `Ctrl+F2` | Select all occurrences |
+| `Ctrl+A` | Select all |
+| `Ctrl+Z` | Undo |
+| `Ctrl+Shift+Z` | Redo |
+| `Alt+↑ / ↓` | Move line up / down |
+| `Shift+Alt+↑ / ↓` | Copy line up / down |
+| `Ctrl+Alt+↑ / ↓` | Add cursor above / below |
+| `Ctrl+Shift+Alt+↑ / ↓` | Add cursor in column above / below |
+| `Alt+drag` | Rectangular (column) selection |
 
 ---
 
