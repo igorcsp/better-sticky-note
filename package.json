@@ -1,6 +1,6 @@
 {
   "name": "better-sticky-notes",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A Windows desktop sticky notes app with rich text editing and cloud sync.",
   "main": "out/main/index.js",
   "scripts": {
