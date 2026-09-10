@@ -19,8 +19,8 @@ const PRESETS = [
   '#E0E0E0', // gray
 ]
 
-export const MIN_FONT_SIZE = 12
-export const MAX_FONT_SIZE = 24
+const MIN_FONT_SIZE = 12
+const MAX_FONT_SIZE = 24
 
 export default function NoteControls({
   color,

@@ -9,7 +9,7 @@ export interface Bounds {
 
 export type Theme = 'light' | 'dark' | 'system'
 
-export interface StoreSchema {
+interface StoreSchema {
   openNoteIds: string[]
   theme: Theme
   // Per-note window bounds, keyed by noteId, so each note reopens where it was.
